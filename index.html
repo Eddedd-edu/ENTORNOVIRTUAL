@@ -9,18 +9,11 @@
 <style>
 :root{
     --verde:#0f3d1e;
-    --verde2:#145a2a;
     --amarillo:#f2b705;
-    --amarillo2:#ffd54f;
     --blanco:#ffffff;
 }
 
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    font-family:'Segoe UI',sans-serif;
-}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif;}
 
 body{
     background:linear-gradient(135deg,var(--verde),#071e10);
@@ -32,33 +25,11 @@ body{
     padding:30px 15px;
 }
 
-/* HEADER */
-header{
-    text-align:center;
-    margin-bottom:30px;
-    animation:fadeDown 1s ease;
-}
+header{text-align:center;margin-bottom:30px;}
+header img{width:120px;margin-bottom:15px;}
+header h1{color:var(--amarillo);}
+header p{opacity:0.8;}
 
-header img{
-    width:120px;
-    margin-bottom:15px;
-}
-
-header h1{
-    color:var(--amarillo);
-    letter-spacing:1px;
-}
-
-header p{
-    opacity:0.8;
-}
-
-@keyframes fadeDown{
-    from{opacity:0;transform:translateY(-30px);}
-    to{opacity:1;transform:translateY(0);}
-}
-
-/* GRID */
 .menu-grid{
     width:100%;
     max-width:1200px;
@@ -67,7 +38,6 @@ header p{
     gap:20px;
 }
 
-/* CARDS */
 .menu-card{
     background:rgba(255,255,255,0.08);
     backdrop-filter:blur(12px);
@@ -77,25 +47,6 @@ header p{
     cursor:pointer;
     transition:0.4s;
     border:1px solid rgba(255,255,255,0.1);
-    position:relative;
-    overflow:hidden;
-}
-
-.menu-card::before{
-    content:"";
-    position:absolute;
-    width:150%;
-    height:150%;
-    background:linear-gradient(45deg,transparent,var(--amarillo2),transparent);
-    transform:rotate(45deg);
-    top:-100%;
-    left:-100%;
-    transition:0.6s;
-}
-
-.menu-card:hover::before{
-    top:100%;
-    left:100%;
 }
 
 .menu-card:hover{
@@ -109,24 +60,13 @@ header p{
     margin-bottom:15px;
 }
 
-.menu-card h3{
-    margin-bottom:8px;
-}
-
-.menu-card p{
-    font-size:0.9rem;
-    opacity:0.8;
-}
-
-/* ENCUESTA MODAL */
+/* MODAL GENERAL */
 .modal{
     display:none;
     position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.8);
+    top:0;left:0;
+    width:100%;height:100%;
+    background:rgba(0,0,0,0.85);
     justify-content:center;
     align-items:center;
     padding:20px;
@@ -134,37 +74,19 @@ header p{
 }
 
 .modal-content{
-    background:rgba(20,90,42,0.95);
+    background:rgba(20,90,42,0.97);
     padding:30px;
     border-radius:20px;
-    max-width:800px;
+    max-width:900px;
     width:100%;
     max-height:90vh;
     overflow-y:auto;
-    animation:fadeUp 0.5s ease;
 }
 
-@keyframes fadeUp{
-    from{opacity:0;transform:translateY(30px);}
-    to{opacity:1;transform:translateY(0);}
-}
-
-.modal-content h2{
-    color:var(--amarillo);
-    margin-bottom:20px;
-}
-
-.question{
-    margin-bottom:20px;
-}
-
-.question h4{
-    margin-bottom:8px;
-}
-
-.question label{
-    margin-right:15px;
+.close-btn{
+    float:right;
     cursor:pointer;
+    color:var(--amarillo);
 }
 
 button.submit{
@@ -174,121 +96,158 @@ button.submit{
     border-radius:10px;
     font-weight:bold;
     cursor:pointer;
-    margin-top:10px;
+    margin-top:15px;
 }
 
-.close-btn{
-    float:right;
-    cursor:pointer;
-    color:var(--amarillo2);
-}
+.question{margin-bottom:15px;}
+.question label{margin-right:10px;}
 
 footer{
     margin-top:30px;
     opacity:0.6;
-    font-size:0.85rem;
 }
 </style>
 </head>
+
 <body>
 
 <header>
     <img src="logo.png" alt="Escudo">
     <h1>ENTORNO VIRTUAL</h1>
-    <p>Institución Educativa Técnica San José<br>Fresno - Tolima</p>
+    <p>I.E.T. San José - Fresno Tolima</p>
 </header>
 
 <div class="menu-grid">
 
-    <div class="menu-card" onclick="window.open('https://eddedd-edu.github.io/Lab-LeyesGas/')">
+    <!-- LABORATORIO UNIFICADO -->
+    <div class="menu-card" onclick="abrirLabs()">
         <i class="fas fa-flask"></i>
-        <h3>Leyes de los Gases</h3>
-        <p>Laboratorio Virtual Interactivo</p>
-    </div>
-
-    <div class="menu-card" onclick="window.open('https://eddedd-edu.github.io/Lab-Atomo/')">
-        <i class="fas fa-atom"></i>
-        <h3>Laboratorio del Átomo</h3>
-        <p>Simulación Atómica</p>
+        <h3>Laboratorio Virtual SJ</h3>
     </div>
 
     <div class="menu-card" onclick="window.open('https://www.zipgrade.com/s/')">
         <i class="fas fa-check-circle"></i>
         <h3>Evaluación Docente</h3>
-        <p>Plataforma ZipGrade</p>
     </div>
 
     <div class="menu-card" onclick="abrirEncuesta()">
         <i class="fas fa-clipboard-list"></i>
         <h3>Encuesta Estudiantes</h3>
-        <p>Evaluación Anual Docente</p>
     </div>
 
-    <div class="menu-card">
-        <i class="fas fa-microscope"></i>
-        <h3>Laboratorio Biología</h3>
-        <p>Próximamente</p>
-    </div>
+</div>
 
-    <div class="menu-card">
-        <i class="fas fa-calculator"></i>
-        <h3>Recursos Matemáticos</h3>
-        <p>Próximamente</p>
-    </div>
+<!-- MODAL LABS -->
+<div class="modal" id="modalLabs">
+<div class="modal-content">
+<span class="close-btn" onclick="cerrarLabs()">✖ Cerrar</span>
+<h2>Laboratorio Virtual SJ</h2>
 
-    <div class="menu-card">
-        <i class="fas fa-book"></i>
-        <h3>Biblioteca Virtual</h3>
-        <p>Recursos Académicos</p>
-    </div>
+<div class="menu-card" onclick="window.open('https://eddedd-edu.github.io/Lab-LeyesGas/')">
+<i class="fas fa-wind"></i>
+<h3>Leyes de los Gases</h3>
+</div>
 
-    <div class="menu-card">
-        <i class="fas fa-globe"></i>
-        <h3>Otras Fuentes</h3>
-        <p>Enlaces Educativos</p>
-    </div>
+<br>
 
+<div class="menu-card" onclick="window.open('https://eddedd-edu.github.io/Lab-Atomo/')">
+<i class="fas fa-atom"></i>
+<h3>Laboratorio del Átomo</h3>
+</div>
+
+</div>
 </div>
 
 <!-- MODAL ENCUESTA -->
 <div class="modal" id="modalEncuesta">
-    <div class="modal-content">
-        <span class="close-btn" onclick="cerrarEncuesta()">✖ Cerrar</span>
-        <h2>Encuesta a Estudiantes</h2>
+<div class="modal-content">
 
-        <div class="question">
-            <h4>1. Presenta los temas con claridad</h4>
-            <label><input type="radio" name="q1"> Nunca</label>
-            <label><input type="radio" name="q1"> Algunas veces</label>
-            <label><input type="radio" name="q1"> Casi siempre</label>
-            <label><input type="radio" name="q1"> Siempre</label>
-        </div>
+<span class="close-btn" onclick="cerrarEncuesta()">✖ Cerrar</span>
+<h2>Encuesta a Estudiantes</h2>
 
-        <div class="question">
-            <h4>2. Responde dudas en clase</h4>
-            <label><input type="radio" name="q2"> Nunca</label>
-            <label><input type="radio" name="q2"> Algunas veces</label>
-            <label><input type="radio" name="q2"> Casi siempre</label>
-            <label><input type="radio" name="q2"> Siempre</label>
-        </div>
+<form id="formEncuesta">
 
-        <button class="submit" onclick="alert('¡Gracias por tu opinión!')">
-            Enviar Encuesta
-        </button>
-    </div>
+<input type="text" id="jornada" placeholder="Jornada" required>
+<input type="text" id="grado" placeholder="Grado y Curso" required>
+<input type="date" id="fecha" required>
+<input type="text" id="asignatura" placeholder="Asignatura" required>
+
+<div class="question">
+<h4>1. Entregó el programa al inicio del curso</h4>
+<label><input type="radio" name="q1" value="Si" required> Sí</label>
+<label><input type="radio" name="q1" value="No"> No</label>
+</div>
+
+<div class="question">
+<h4>2. Presenta los temas con claridad</h4>
+<label><input type="radio" name="q2" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q2" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q2" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q2" value="Siempre"> Siempre</label>
+</div>
+
+<!-- (Puede duplicar estructura hasta pregunta 20 si quiere todas almacenadas) -->
+
+<button type="submit" class="submit">Enviar Encuesta</button>
+
+</form>
+
+</div>
 </div>
 
 <footer>
-    © 2026 I.E.T. San José - Fresno Tolima | Nil Difficile Volenti
+© 2026 I.E.T. San José | Nil Difficile Volenti
 </footer>
 
+<script type="module">
+
+/* ===== FIREBASE MISMA CONFIGURACIÓN ===== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
+    authDomain: "quimicaquest.firebaseapp.com",
+    projectId: "quimicaquest",
+    storageBucket: "quimicaquest.firebasestorage.app",
+    messagingSenderId: "796534851347",
+    appId: "1:796534851347:web:ae85716a8b612d889b3ce6"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ===== ENVÍO ENCUESTA ===== */
+document.getElementById("formEncuesta").addEventListener("submit", async (e)=>{
+e.preventDefault();
+
+const data = {
+    jornada: document.getElementById("jornada").value,
+    grado: document.getElementById("grado").value,
+    fecha: document.getElementById("fecha").value,
+    asignatura: document.getElementById("asignatura").value,
+    q1: document.querySelector('input[name="q1"]:checked').value,
+    q2: document.querySelector('input[name="q2"]:checked').value,
+    timestamp: new Date()
+};
+
+try{
+    await addDoc(collection(db, "encuestas_estudiantes"), data);
+    alert("✅ Encuesta guardada correctamente en la nube");
+    cerrarEncuesta();
+}catch(error){
+    alert("❌ Error guardando encuesta");
+    console.error(error);
+}
+});
+
+</script>
+
 <script>
-function abrirEncuesta(){
-    document.getElementById("modalEncuesta").style.display="flex";
-}
-function cerrarEncuesta(){
-    document.getElementById("modalEncuesta").style.display="none";
-}
+function abrirEncuesta(){document.getElementById("modalEncuesta").style.display="flex";}
+function cerrarEncuesta(){document.getElementById("modalEncuesta").style.display="none";}
+function abrirLabs(){document.getElementById("modalLabs").style.display="flex";}
+function cerrarLabs(){document.getElementById("modalLabs").style.display="none";}
 </script>
 
 </body>
