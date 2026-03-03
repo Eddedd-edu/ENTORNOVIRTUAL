@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entorno Virtual I.E.T. San José</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root{
+    --verde:#0f3d1e;
+    --verde2:#145a2a;
+    --amarillo:#f2b705;
+    --amarillo2:#ffd54f;
+    --blanco:#ffffff;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,var(--verde),#071e10);
+    color:var(--blanco);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:30px 15px;
+}
+
+/* HEADER */
+header{
+    text-align:center;
+    margin-bottom:30px;
+    animation:fadeDown 1s ease;
+}
+
+header img{
+    width:120px;
+    margin-bottom:15px;
+}
+
+header h1{
+    color:var(--amarillo);
+    letter-spacing:1px;
+}
+
+header p{
+    opacity:0.8;
+}
+
+@keyframes fadeDown{
+    from{opacity:0;transform:translateY(-30px);}
+    to{opacity:1;transform:translateY(0);}
+}
+
+/* GRID */
+.menu-grid{
+    width:100%;
+    max-width:1200px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:20px;
+}
+
+/* CARDS */
+.menu-card{
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(12px);
+    padding:30px 20px;
+    border-radius:20px;
+    text-align:center;
+    cursor:pointer;
+    transition:0.4s;
+    border:1px solid rgba(255,255,255,0.1);
+    position:relative;
+    overflow:hidden;
+}
+
+.menu-card::before{
+    content:"";
+    position:absolute;
+    width:150%;
+    height:150%;
+    background:linear-gradient(45deg,transparent,var(--amarillo2),transparent);
+    transform:rotate(45deg);
+    top:-100%;
+    left:-100%;
+    transition:0.6s;
+}
+
+.menu-card:hover::before{
+    top:100%;
+    left:100%;
+}
+
+.menu-card:hover{
+    transform:translateY(-8px) scale(1.04);
+    box-shadow:0 15px 30px rgba(0,0,0,0.4);
+}
+
+.menu-card i{
+    font-size:2.2rem;
+    color:var(--amarillo);
+    margin-bottom:15px;
+}
+
+.menu-card h3{
+    margin-bottom:8px;
+}
+
+.menu-card p{
+    font-size:0.9rem;
+    opacity:0.8;
+}
+
+/* ENCUESTA MODAL */
+.modal{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.8);
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    z-index:999;
+}
+
+.modal-content{
+    background:rgba(20,90,42,0.95);
+    padding:30px;
+    border-radius:20px;
+    max-width:800px;
+    width:100%;
+    max-height:90vh;
+    overflow-y:auto;
+    animation:fadeUp 0.5s ease;
+}
+
+@keyframes fadeUp{
+    from{opacity:0;transform:translateY(30px);}
+    to{opacity:1;transform:translateY(0);}
+}
+
+.modal-content h2{
+    color:var(--amarillo);
+    margin-bottom:20px;
+}
+
+.question{
+    margin-bottom:20px;
+}
+
+.question h4{
+    margin-bottom:8px;
+}
+
+.question label{
+    margin-right:15px;
+    cursor:pointer;
+}
+
+button.submit{
+    background:var(--amarillo);
+    border:none;
+    padding:10px 20px;
+    border-radius:10px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.close-btn{
+    float:right;
+    cursor:pointer;
+    color:var(--amarillo2);
+}
+
+footer{
+    margin-top:30px;
+    opacity:0.6;
+    font-size:0.85rem;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <img src="Logo San José HD.png" alt="Escudo">
+    <h1>ENTORNO VIRTUAL</h1>
+    <p>Institución Educativa Técnica San José<br>Fresno - Tolima</p>
+</header>
+
+<div class="menu-grid">
+
+    <div class="menu-card" onclick="window.open('https://eddedd-edu.github.io/Lab-LeyesGas/')">
+        <i class="fas fa-flask"></i>
+        <h3>Leyes de los Gases</h3>
+        <p>Laboratorio Virtual Interactivo</p>
+    </div>
+
+    <div class="menu-card" onclick="window.open('https://eddedd-edu.github.io/Lab-Atomo/')">
+        <i class="fas fa-atom"></i>
+        <h3>Laboratorio del Átomo</h3>
+        <p>Simulación Atómica</p>
+    </div>
+
+    <div class="menu-card" onclick="window.open('https://www.zipgrade.com/s/')">
+        <i class="fas fa-check-circle"></i>
+        <h3>Evaluación Docente</h3>
+        <p>Plataforma ZipGrade</p>
+    </div>
+
+    <div class="menu-card" onclick="abrirEncuesta()">
+        <i class="fas fa-clipboard-list"></i>
+        <h3>Encuesta Estudiantes</h3>
+        <p>Evaluación Anual Docente</p>
+    </div>
+
+    <div class="menu-card">
+        <i class="fas fa-microscope"></i>
+        <h3>Laboratorio Biología</h3>
+        <p>Próximamente</p>
+    </div>
+
+    <div class="menu-card">
+        <i class="fas fa-calculator"></i>
+        <h3>Recursos Matemáticos</h3>
+        <p>Próximamente</p>
+    </div>
+
+    <div class="menu-card">
+        <i class="fas fa-book"></i>
+        <h3>Biblioteca Virtual</h3>
+        <p>Recursos Académicos</p>
+    </div>
+
+    <div class="menu-card">
+        <i class="fas fa-globe"></i>
+        <h3>Otras Fuentes</h3>
+        <p>Enlaces Educativos</p>
+    </div>
+
+</div>
+
+<!-- MODAL ENCUESTA -->
+<div class="modal" id="modalEncuesta">
+    <div class="modal-content">
+        <span class="close-btn" onclick="cerrarEncuesta()">✖ Cerrar</span>
+        <h2>Encuesta a Estudiantes</h2>
+
+        <div class="question">
+            <h4>1. Presenta los temas con claridad</h4>
+            <label><input type="radio" name="q1"> Nunca</label>
+            <label><input type="radio" name="q1"> Algunas veces</label>
+            <label><input type="radio" name="q1"> Casi siempre</label>
+            <label><input type="radio" name="q1"> Siempre</label>
+        </div>
+
+        <div class="question">
+            <h4>2. Responde dudas en clase</h4>
+            <label><input type="radio" name="q2"> Nunca</label>
+            <label><input type="radio" name="q2"> Algunas veces</label>
+            <label><input type="radio" name="q2"> Casi siempre</label>
+            <label><input type="radio" name="q2"> Siempre</label>
+        </div>
+
+        <button class="submit" onclick="alert('¡Gracias por tu opinión!')">
+            Enviar Encuesta
+        </button>
+    </div>
+</div>
+
+<footer>
+    © 2026 I.E.T. San José - Fresno Tolima | Nil Difficile Volenti
+</footer>
+
+<script>
+function abrirEncuesta(){
+    document.getElementById("modalEncuesta").style.display="flex";
+}
+function cerrarEncuesta(){
+    document.getElementById("modalEncuesta").style.display="none";
+}
+</script>
+
+</body>
+</html>
