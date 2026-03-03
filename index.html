@@ -60,7 +60,7 @@ header p{opacity:0.8;}
     margin-bottom:15px;
 }
 
-/* MODAL GENERAL */
+/* MODAL */
 .modal{
     display:none;
     position:fixed;
@@ -89,6 +89,15 @@ header p{opacity:0.8;}
     color:var(--amarillo);
 }
 
+.question{margin-bottom:15px;}
+.question label{margin-right:10px;display:inline-block;}
+
+input[type="text"], input[type="date"]{
+    width:100%;
+    margin:5px 0;
+    padding:6px;
+}
+
 button.submit{
     background:var(--amarillo);
     border:none;
@@ -98,9 +107,6 @@ button.submit{
     cursor:pointer;
     margin-top:15px;
 }
-
-.question{margin-bottom:15px;}
-.question label{margin-right:10px;}
 
 footer{
     margin-top:30px;
@@ -119,7 +125,6 @@ footer{
 
 <div class="menu-grid">
 
-    <!-- LABORATORIO UNIFICADO -->
     <div class="menu-card" onclick="abrirLabs()">
         <i class="fas fa-flask"></i>
         <h3>Laboratorio Virtual SJ</h3>
@@ -147,14 +152,11 @@ footer{
 <i class="fas fa-wind"></i>
 <h3>Leyes de los Gases</h3>
 </div>
-
 <br>
-
 <div class="menu-card" onclick="window.open('https://eddedd-edu.github.io/Lab-Atomo/')">
 <i class="fas fa-atom"></i>
 <h3>Laboratorio del Átomo</h3>
 </div>
-
 </div>
 </div>
 
@@ -167,31 +169,39 @@ footer{
 
 <form id="formEncuesta">
 
+<h3>Datos Generales</h3>
 <input type="text" id="jornada" placeholder="Jornada" required>
 <input type="text" id="grado" placeholder="Grado y Curso" required>
 <input type="date" id="fecha" required>
 <input type="text" id="asignatura" placeholder="Asignatura" required>
 
+<!-- PREGUNTA 1 -->
 <div class="question">
 <h4>1. Entregó el programa al inicio del curso</h4>
 <label><input type="radio" name="q1" value="Si" required> Sí</label>
 <label><input type="radio" name="q1" value="No"> No</label>
 </div>
 
-<div class="question">
-<h4>2. Presenta los temas con claridad</h4>
-<label><input type="radio" name="q2" value="Nunca" required> Nunca</label>
-<label><input type="radio" name="q2" value="Algunas veces"> Algunas veces</label>
-<label><input type="radio" name="q2" value="Casi siempre"> Casi siempre</label>
-<label><input type="radio" name="q2" value="Siempre"> Siempre</label>
-</div>
+<div id="preguntasDinamicas"></div>
 
-<!-- (Puede duplicar estructura hasta pregunta 20 si quiere todas almacenadas) -->
+<h4>20. Recursos utilizados</h4>
+<div class="question">
+<label><input type="checkbox" value="Tablero" class="recursos"> Tablero</label>
+<label><input type="checkbox" value="Películas y videos" class="recursos"> Películas y videos</label>
+<label><input type="checkbox" value="Láminas" class="recursos"> Láminas y gráficos</label>
+<label><input type="checkbox" value="Computadores" class="recursos"> Computadores</label>
+<label><input type="checkbox" value="Diapositivas" class="recursos"> Diapositivas</label>
+<label><input type="checkbox" value="Música" class="recursos"> Música</label>
+<label><input type="checkbox" value="Libros de texto" class="recursos"> Libros de texto</label>
+<label><input type="checkbox" value="Laboratorios" class="recursos"> Laboratorios</label>
+<label><input type="checkbox" value="Programas educativos" class="recursos"> Programas educativos</label>
+<label><input type="checkbox" value="Mapas" class="recursos"> Mapas</label>
+<label><input type="checkbox" value="Otros" class="recursos"> Otros</label>
+</div>
 
 <button type="submit" class="submit">Enviar Encuesta</button>
 
 </form>
-
 </div>
 </div>
 
@@ -201,44 +211,86 @@ footer{
 
 <script type="module">
 
-/* ===== FIREBASE MISMA CONFIGURACIÓN ===== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
-    authDomain: "quimicaquest.firebaseapp.com",
-    projectId: "quimicaquest",
-    storageBucket: "quimicaquest.firebasestorage.app",
-    messagingSenderId: "796534851347",
-    appId: "1:796534851347:web:ae85716a8b612d889b3ce6"
+apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
+authDomain: "quimicaquest.firebaseapp.com",
+projectId: "quimicaquest",
+storageBucket: "quimicaquest.firebasestorage.app",
+messagingSenderId: "796534851347",
+appId: "1:796534851347:web:ae85716a8b612d889b3ce6"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ===== ENVÍO ENCUESTA ===== */
+const preguntas = [
+"Presenta los temas con claridad",
+"Comunica objetivos de cada clase",
+"Responde dudas en clase",
+"Expresa expectativas positivas",
+"Explica criterios de evaluación",
+"Evalúa adecuadamente",
+"Programa salidas pedagógicas",
+"Atiende dudas fuera de clase",
+"Realiza actividades de recuperación",
+"Indica normas claras",
+"Es respetado por estudiantes",
+"Realiza clases activas y dinámicas",
+"Informa a padres de familia",
+"Llega puntual y orienta adecuadamente",
+"Son interesantes",
+"Empiezan y terminan a tiempo",
+"Desarrollan temas en tiempo indicado",
+"Tratan temas importantes para la comunidad"
+];
+
+function escala(nombre){
+return `
+<label><input type="radio" name="${nombre}" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="${nombre}" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="${nombre}" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="${nombre}" value="Siempre"> Siempre</label>
+`;
+}
+
+preguntas.forEach((p,i)=>{
+document.getElementById("preguntasDinamicas").innerHTML +=
+`<div class="question">
+<h4>${i+2}. ${p}</h4>
+${escala("q"+(i+2))}
+</div>`;
+});
+
 document.getElementById("formEncuesta").addEventListener("submit", async (e)=>{
 e.preventDefault();
 
+let respuestas = {};
+for(let i=1;i<=19;i++){
+respuestas["q"+i] = document.querySelector(`input[name="q${i}"]:checked`).value;
+}
+
+let recursosSeleccionados = [];
+document.querySelectorAll(".recursos:checked").forEach(r=>{
+recursosSeleccionados.push(r.value);
+});
+
 const data = {
-    jornada: document.getElementById("jornada").value,
-    grado: document.getElementById("grado").value,
-    fecha: document.getElementById("fecha").value,
-    asignatura: document.getElementById("asignatura").value,
-    q1: document.querySelector('input[name="q1"]:checked').value,
-    q2: document.querySelector('input[name="q2"]:checked').value,
-    timestamp: new Date()
+jornada: document.getElementById("jornada").value,
+grado: document.getElementById("grado").value,
+fecha: document.getElementById("fecha").value,
+asignatura: document.getElementById("asignatura").value,
+respuestas: respuestas,
+recursos: recursosSeleccionados,
+timestamp: new Date()
 };
 
-try{
-    await addDoc(collection(db, "encuestas_estudiantes"), data);
-    alert("✅ Encuesta guardada correctamente en la nube");
-    cerrarEncuesta();
-}catch(error){
-    alert("❌ Error guardando encuesta");
-    console.error(error);
-}
+await addDoc(collection(db, "encuestas_estudiantes"), data);
+
+alert("✅ Encuesta guardada correctamente en la nube");
+cerrarEncuesta();
 });
 
 </script>
