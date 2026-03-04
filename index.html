@@ -617,40 +617,41 @@ formEncuesta.addEventListener("submit", async (e)=>{
 window.login = async function(){
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
+    
+    // Cambiamos el texto del botón para que sepas que está cargando
+    const btn = document.querySelector('#modalLogin button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+    
     try{
         await signInWithEmailAndPassword(auth, email, password);
         cerrarLogin();
-        await cargarDatos(); 
+        // LLAMADA CORREGIDA: Usamos window.cargarDatos() explícitamente
+        await window.cargarDatos(); 
         document.getElementById("modalPanel").style.display = "flex";
     }catch(err){
         console.error(err);
         alert("Credenciales incorrectas o error de conexión.");
+    }finally{
+        btn.innerHTML = originalText;
     }
 };
 
-window.logout = async function(){
-    try{
-        await signOut(auth);
-        cerrarPanel();
-    }catch(e){ console.error(e); }
-};
-
-onAuthStateChanged(auth, user=>{
-    if(!user) cerrarPanel();
-});
-
 /* --- PANEL: carga y graficado --- */
-export async function cargarDatos(){ }
+// ELIMINAMOS el "export async function..." que estaba causando conflicto
 window.cargarDatos = async function(){
     try{
         const snapshot = await getDocs(collection(db,"encuestas_estudiantes"));
         datosGlobal = [];
         snapshot.forEach(doc => datosGlobal.push(doc.data()));
+        
+        console.log("Datos descargados:", datosGlobal); // Para verificar en la consola
+        
         poblarFiltros();
         aplicarFiltros();
     }catch(e){
         console.error("Error leyendo encuestas:", e);
-        alert("Error leyendo encuestas desde la nube.");
+        alert("Error de permisos. Revisa la consola (Presiona F12).");
     }
 };
 
