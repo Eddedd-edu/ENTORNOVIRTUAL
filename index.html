@@ -4,646 +4,635 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Entorno Virtual I.E.T. San José</title>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
 :root{
-    --verde:#0f3d1e;
-    --amarillo:#f2b705;
-    --blanco:#ffffff;
+--verde:#0f3d1e;
+--amarillo:#f2b705;
+--blanco:#ffffff;
 }
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif;}
 body{
-    background:linear-gradient(135deg,var(--verde),#071e10);
-    color:var(--blanco);
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:30px 15px;
+background:linear-gradient(135deg,var(--verde),#071e10);
+color:var(--blanco);
+min-height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+padding:30px 15px;
 }
 header{text-align:center;margin-bottom:30px;}
 header img{width:120px;margin-bottom:15px;}
 header h1{color:var(--amarillo);}
 header p{opacity:0.8;}
-
 .menu-grid{
-    width:100%;
-    max-width:1200px;
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
+width:100%;
+max-width:1200px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
 }
-
 .menu-card{
-    background:rgba(255,255,255,0.08);
-    padding:30px 20px;
-    border-radius:20px;
-    text-align:center;
-    cursor:pointer;
-    transition:0.3s;
+background:rgba(255,255,255,0.08);
+padding:30px 20px;
+border-radius:20px;
+text-align:center;
+cursor:pointer;
+transition:0.3s;
 }
-
 .menu-card:hover{
-    transform:translateY(-6px);
-    box-shadow:0 10px 25px rgba(0,0,0,0.4);
+transform:translateY(-6px);
+box-shadow:0 10px 25px rgba(0,0,0,0.4);
 }
-
 .menu-card i{
-    font-size:2rem;
-    color:var(--amarillo);
-    margin-bottom:12px;
+font-size:2rem;
+color:var(--amarillo);
+margin-bottom:12px;
 }
-
 .modal{
-    display:none;
-    position:fixed;
-    top:0;left:0;
-    width:100%;height:100%;
-    background:rgba(0,0,0,0.85);
-    justify-content:center;
-    align-items:center;
-    padding:20px;
-    z-index:999;
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.85);
+justify-content:center;
+align-items:center;
+padding:20px;
+z-index:999;
 }
-
 .modal-content{
-    background:#145a2a;
-    padding:30px;
-    border-radius:20px;
-    max-width:1000px;
-    width:100%;
-    max-height:90vh;
-    overflow-y:auto;
-    color:var(--blanco);
+background:#145a2a;
+padding:30px;
+border-radius:20px;
+max-width:1000px;
+width:100%;
+max-height:90vh;
+overflow-y:auto;
+color:var(--blanco);
 }
-
 .close-btn{
-    float:right;
-    cursor:pointer;
-    color:var(--amarillo);
+float:right;
+cursor:pointer;
+color:var(--amarillo);
 }
-
 input, select, textarea{
-    padding:6px;
-    margin:5px 0;
-    width:100%;
-    border-radius:6px;
-    border:1px solid rgba(255,255,255,0.08);
-    background:rgba(255,255,255,0.03);
-    color:var(--blanco);
+padding:6px;
+margin:5px 0;
+width:100%;
+border-radius:6px;
+border:1px solid rgba(255,255,255,0.08);
+background:rgba(255,255,255,0.03);
+color:var(--blanco);
 }
-
 button{
-    padding:8px 15px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    background:var(--amarillo);
-    font-weight:bold;
+padding:8px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:var(--amarillo);
+font-weight:bold;
+transition: 0.2s;
 }
-
+button:hover{
+opacity: 0.9;
+}
 label{display:inline-block;margin-right:12px;margin-top:6px;}
-
 .question{margin-bottom:14px;padding-bottom:6px;border-bottom:1px dashed rgba(255,255,255,0.03);}
 .question h4{margin-bottom:8px;color:#fff;}
 .small-note{font-size:0.9rem;opacity:0.9;margin-bottom:8px;}
-
 canvas{
-    background:#fff;
-    border-radius:12px;
-    padding:10px;
-    margin-top:20px;
+background:#fff;
+border-radius:12px;
+padding:10px;
+margin-top:20px;
 }
-
 footer{margin-top:30px;opacity:0.6;}
+
+.btn-excel { background: #28a745; color: white; }
+.btn-pdf { background: #dc3545; color: white; }
+
 /* responsive */
 @media (max-width:640px){
-    .modal-content{padding:18px;}
-    input,select,textarea{font-size:0.95rem;}
+.modal-content{padding:18px;}
+input,select,textarea{font-size:0.95rem;}
 }
 </style>
 </head>
-
 <body>
-
 <header>
-    <img src="logo.png" alt="Escudo">
-    <h1>ENTORNO VIRTUAL SJ</h1>
-    <p>I.E.T. San José - Fresno Tolima</p>
+<img src="logo.png" alt="Escudo">
+<h1>ENTORNO VIRTUAL SJ</h1>
+<p>I.E.T. San José - Fresno Tolima</p>
 </header>
-
 <div class="menu-grid">
-
-    <div class="menu-card" onclick="abrirLabs()">
-        <i class="fas fa-flask"></i>
-        <h3>Laboratorio Virtual SJ</h3>
-        <p>Haz click para elegir laboratorio</p>
-    </div>
-
-    <div class="menu-card" onclick="window.open('https://www.zipgrade.com/s/')">
-        <i class="fas fa-check-circle"></i>
-        <h3>Evaluación Docente</h3>
-        <p>ZipGrade</p>
-    </div>
-
-    <div class="menu-card" onclick="abrirEncuesta()">
-        <i class="fas fa-clipboard-list"></i>
-        <h3>Encuesta Estudiantes</h3>
-        <p>Evaluación anual (MEN)</p>
-    </div>
-
-    <div class="menu-card" onclick="abrirLogin()">
-        <i class="fas fa-chart-bar"></i>
-        <h3>Panel Estadístico</h3>
-        <p>Acceso restringido</p>
-    </div>
-
+<div class="menu-card" onclick="abrirLabs()">
+<i class="fas fa-flask"></i>
+<h3>Laboratorio Virtual SJ</h3>
+<p>Haz click para elegir laboratorio</p>
 </div>
-
-<!-- MODAL LABORATORIOS -->
+<div class="menu-card" onclick="window.open('https://www.zipgrade.com/s/')">
+<i class="fas fa-check-circle"></i>
+<h3>Evaluación Docente</h3>
+<p>ZipGrade</p>
+</div>
+<div class="menu-card" onclick="abrirEncuesta()">
+<i class="fas fa-clipboard-list"></i>
+<h3>Encuesta Estudiantes</h3>
+<p>Evaluación anual (MEN)</p>
+</div>
+<div class="menu-card" onclick="abrirLogin()">
+<i class="fas fa-chart-bar"></i>
+<h3>Panel Estadístico</h3>
+<p>Acceso restringido</p>
+</div>
+</div>
 <div class="modal" id="modalLabs">
-  <div class="modal-content">
-    <span class="close-btn" onclick="cerrarLabs()">✖ Cerrar</span>
-    <h2>Laboratorio Virtual SJ</h2>
-
-    <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px;">
-      <div class="menu-card" style="cursor:pointer;" onclick="window.open('https://eddedd-edu.github.io/Lab-LeyesGas/')">
-        <i class="fas fa-wind"></i>
-        <h3>Leyes de los Gases</h3>
-        <p>Laboratorio Leyes de los Gases</p>
-      </div>
-
-      <div class="menu-card" style="cursor:pointer;" onclick="window.open('https://eddedd-edu.github.io/Lab-Atomo/')">
-        <i class="fas fa-atom"></i>
-        <h3>Laboratorio del Átomo</h3>
-        <p>Simulación Atómica</p>
-      </div>
-    </div>
-
-  </div>
+<div class="modal-content">
+<span class="close-btn" onclick="cerrarLabs()">✖ Cerrar</span>
+<h2>Laboratorio Virtual SJ</h2>
+<div style="display:flex;flex-direction:column;gap:12px;margin-top:12px;">
+<div class="menu-card" style="cursor:pointer;" onclick="window.open('https://eddedd-edu.github.io/Lab-LeyesGas/')">
+<i class="fas fa-wind"></i>
+<h3>Leyes de los Gases</h3>
+<p>Laboratorio Leyes de los Gases</p>
 </div>
-
-<!-- MODAL ENCUESTA (COMPLETA) -->
+<div class="menu-card" style="cursor:pointer;" onclick="window.open('https://eddedd-edu.github.io/Lab-Atomo/')">
+<i class="fas fa-atom"></i>
+<h3>Laboratorio del Átomo</h3>
+<p>Simulación Atómica</p>
+</div>
+</div>
+</div>
+</div>
 <div class="modal" id="modalEncuesta">
-  <div class="modal-content">
-    <span class="close-btn" onclick="cerrarEncuesta()">✖ Cerrar</span>
-    <h2>Encuesta a Estudiantes (Anexo 3 - MEN)</h2>
-    <p class="small-note">Por favor responda con la mayor objetividad. Esta encuesta se guardará automáticamente.</p>
-
-    <form id="formEncuesta">
-
-      <h3>Datos generales</h3>
-      <div class="question">
-        <label>Establecimiento:</label>
-        <input type="text" id="establecimiento" placeholder="I.E.T. San José" value="I.E.T. San José" required>
-
-        <label>Jornada:</label>
-        <input type="text" id="jornada" placeholder="Mañana/Tarde" required>
-
-        <label>Grado y curso:</label>
-        <input type="text" id="grado" placeholder="10-1" required>
-
-        <label>Fecha:</label>
-        <input type="date" id="fecha" required>
-
-        <label>Asignatura:</label>
-        <input type="text" id="asignatura" placeholder="Química" required>
-      </div>
-
-      <!-- Pregunta 1: Sí / No -->
-      <div class="question">
-        <h4>1. El profesor entregó el programa de la asignatura al inicio del curso</h4>
-        <label><input type="radio" name="q1" value="Sí" required> Sí</label>
-        <label><input type="radio" name="q1" value="No"> No</label>
-      </div>
-
-      <h3>EL PROFESOR</h3>
-
-      <!-- Preguntas 2 - 15 (escala) -->
-      <div class="question">
-        <h4>2. Presenta los temas con mucha claridad</h4>
-        <label><input type="radio" name="q2" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q2" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q2" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q2" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>3. Comunica claramente los objetivos de cada clase</h4>
-        <label><input type="radio" name="q3" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q3" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q3" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q3" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>4. Responde las dudas de los estudiantes en clase</h4>
-        <label><input type="radio" name="q4" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q4" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q4" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q4" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>5. Expresa expectativas positivas de los estudiantes</h4>
-        <label><input type="radio" name="q5" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q5" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q5" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q5" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>6. Explica los criterios de evaluación de la materia</h4>
-        <label><input type="radio" name="q6" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q6" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q6" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q6" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>7. Evalúa adecuadamente la materia</h4>
-        <label><input type="radio" name="q7" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q7" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q7" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q7" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>8. Programa y coordina salidas pedagógicas como complemento a la materia</h4>
-        <label><input type="radio" name="q8" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q8" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q8" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q8" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>9. Atiende dudas académicas de los estudiantes fuera de clase</h4>
-        <label><input type="radio" name="q9" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q9" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q9" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q9" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>10. Realiza actividades de recuperación y refuerzo con estudiantes que lo necesitan</h4>
-        <label><input type="radio" name="q10" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q10" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q10" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q10" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>11. Indica normas de comportamiento en clase claras para todos</h4>
-        <label><input type="radio" name="q11" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q11" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q11" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q11" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>12. Es respetado por todos los estudiantes del curso</h4>
-        <label><input type="radio" name="q12" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q12" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q12" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q12" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>13. Realiza clases activas y dinámicas</h4>
-        <label><input type="radio" name="q13" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q13" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q13" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q13" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>14. Informa a padres de familia y acudientes sobre el desempeño de los estudiantes</h4>
-        <label><input type="radio" name="q14" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q14" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q14" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q14" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>15. Llega a clase y sus orientaciones son seguidas por todos los estudiantes</h4>
-        <label><input type="radio" name="q15" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q15" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q15" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q15" value="Siempre"> Siempre</label>
-      </div>
-
-      <h3>LAS CLASES</h3>
-
-      <div class="question">
-        <h4>16. Son interesantes porque tratan temas llamativos</h4>
-        <label><input type="radio" name="q16" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q16" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q16" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q16" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>17. Empiezan y terminan a la hora indicada</h4>
-        <label><input type="radio" name="q17" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q17" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q17" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q17" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>18. Desarrollan los temas propuestos en el tiempo indicado</h4>
-        <label><input type="radio" name="q18" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q18" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q18" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q18" value="Siempre"> Siempre</label>
-      </div>
-
-      <div class="question">
-        <h4>19. Tratan temas importantes para el barrio, la zona o la comunidad</h4>
-        <label><input type="radio" name="q19" value="Nunca" required> Nunca</label>
-        <label><input type="radio" name="q19" value="Algunas veces"> Algunas veces</label>
-        <label><input type="radio" name="q19" value="Casi siempre"> Casi siempre</label>
-        <label><input type="radio" name="q19" value="Siempre"> Siempre</label>
-      </div>
-
-      <h3>20. ¿Cuáles de los siguientes recursos usa el profesor para desarrollar sus clases?</h3>
-      <div class="question">
-        <label><input type="checkbox" class="recursos" value="Tablero"> Tablero</label><br>
-        <label><input type="checkbox" class="recursos" value="Películas y videos"> Películas y videos</label><br>
-        <label><input type="checkbox" class="recursos" value="Láminas y otros materiales gráficos"> Láminas y otros materiales gráficos</label><br>
-        <label><input type="checkbox" class="recursos" value="Computadores"> Computadores</label><br>
-        <label><input type="checkbox" class="recursos" value="Diapositivas o acetatos"> Diapositivas o acetatos</label><br>
-        <label><input type="checkbox" class="recursos" value="Música"> Música</label><br>
-        <label><input type="checkbox" class="recursos" value="Libros de texto"> Libros de texto</label><br>
-        <label><input type="checkbox" class="recursos" value="Laboratorios"> Laboratorios</label><br>
-        <label><input type="checkbox" class="recursos" value="Programas educativos computarizados"> Programas educativos computarizados</label><br>
-        <label><input type="checkbox" class="recursos" value="Mapas"> Mapas</label><br>
-        <label><input type="checkbox" class="recursos" value="Otros"> Otros</label>
-      </div>
-
-      <div style="margin-top:14px;">
-        <button type="submit" class="submit">Enviar Encuesta</button>
-      </div>
-
-    </form>
-  </div>
+<div class="modal-content">
+<span class="close-btn" onclick="cerrarEncuesta()">✖ Cerrar</span>
+<h2>Encuesta a Estudiantes (Anexo 3 - MEN)</h2>
+<p class="small-note">Por favor responda con la mayor objetividad. Esta encuesta se guardará automáticamente.</p>
+<form id="formEncuesta">
+<h3>Datos generales</h3>
+<div class="question">
+<label>Establecimiento:</label>
+<input type="text" id="establecimiento" placeholder="I.E.T. San José" value="I.E.T. San José" required>
+<label>Jornada:</label>
+<input type="text" id="jornada" placeholder="Mañana/Tarde" required>
+<label>Grado y curso:</label>
+<input type="text" id="grado" placeholder="10-1" required>
+<label>Fecha:</label>
+<input type="date" id="fecha" required>
+<label>Asignatura:</label>
+<input type="text" id="asignatura" placeholder="Química" required>
 </div>
-
-<!-- MODAL LOGIN -->
+<div class="question">
+<h4>1. El profesor entregó el programa de la asignatura al inicio del curso</h4>
+<label><input type="radio" name="q1" value="Sí" required> Sí</label>
+<label><input type="radio" name="q1" value="No"> No</label>
+</div>
+<h3>EL PROFESOR</h3>
+<div class="question">
+<h4>2. Presenta los temas con mucha claridad</h4>
+<label><input type="radio" name="q2" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q2" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q2" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q2" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>3. Comunica claramente los objetivos de cada clase</h4>
+<label><input type="radio" name="q3" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q3" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q3" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q3" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>4. Responde las dudas de los estudiantes en clase</h4>
+<label><input type="radio" name="q4" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q4" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q4" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q4" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>5. Expresa expectativas positivas de los estudiantes</h4>
+<label><input type="radio" name="q5" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q5" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q5" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q5" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>6. Explica los criterios de evaluación de la materia</h4>
+<label><input type="radio" name="q6" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q6" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q6" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q6" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>7. Evalúa adecuadamente la materia</h4>
+<label><input type="radio" name="q7" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q7" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q7" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q7" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>8. Programa y coordina salidas pedagógicas como complemento a la materia</h4>
+<label><input type="radio" name="q8" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q8" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q8" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q8" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>9. Atiende dudas académicas de los estudiantes fuera de clase</h4>
+<label><input type="radio" name="q9" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q9" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q9" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q9" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>10. Realiza actividades de recuperación y refuerzo con estudiantes que lo necesitan</h4>
+<label><input type="radio" name="q10" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q10" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q10" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q10" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>11. Indica normas de comportamiento en clase claras para todos</h4>
+<label><input type="radio" name="q11" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q11" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q11" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q11" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>12. Es respetado por todos los estudiantes del curso</h4>
+<label><input type="radio" name="q12" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q12" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q12" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q12" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>13. Realiza clases activas y dinámicas</h4>
+<label><input type="radio" name="q13" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q13" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q13" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q13" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>14. Informa a padres de familia y acudientes sobre el desempeño de los estudiantes</h4>
+<label><input type="radio" name="q14" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q14" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q14" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q14" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>15. Llega a clase y sus orientaciones son seguidas por todos los estudiantes</h4>
+<label><input type="radio" name="q15" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q15" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q15" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q15" value="Siempre"> Siempre</label>
+</div>
+<h3>LAS CLASES</h3>
+<div class="question">
+<h4>16. Son interesantes porque tratan temas llamativos</h4>
+<label><input type="radio" name="q16" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q16" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q16" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q16" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>17. Empiezan y terminan a la hora indicada</h4>
+<label><input type="radio" name="q17" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q17" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q17" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q17" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>18. Desarrollan los temas propuestos en el tiempo indicado</h4>
+<label><input type="radio" name="q18" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q18" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q18" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q18" value="Siempre"> Siempre</label>
+</div>
+<div class="question">
+<h4>19. Tratan temas importantes para el barrio, la zona o la comunidad</h4>
+<label><input type="radio" name="q19" value="Nunca" required> Nunca</label>
+<label><input type="radio" name="q19" value="Algunas veces"> Algunas veces</label>
+<label><input type="radio" name="q19" value="Casi siempre"> Casi siempre</label>
+<label><input type="radio" name="q19" value="Siempre"> Siempre</label>
+</div>
+<h3>20. ¿Cuáles de los siguientes recursos usa el profesor para desarrollar sus clases?</h3>
+<div class="question">
+<label><input type="checkbox" class="recursos" value="Tablero"> Tablero</label><br>
+<label><input type="checkbox" class="recursos" value="Películas y videos"> Películas y videos</label><br>
+<label><input type="checkbox" class="recursos" value="Láminas y otros materiales gráficos"> Láminas y otros materiales gráficos</label><br>
+<label><input type="checkbox" class="recursos" value="Computadores"> Computadores</label><br>
+<label><input type="checkbox" class="recursos" value="Diapositivas o acetatos"> Diapositivas o acetatos</label><br>
+<label><input type="checkbox" class="recursos" value="Música"> Música</label><br>
+<label><input type="checkbox" class="recursos" value="Libros de texto"> Libros de texto</label><br>
+<label><input type="checkbox" class="recursos" value="Laboratorios"> Laboratorios</label><br>
+<label><input type="checkbox" class="recursos" value="Programas educativos computarizados"> Programas educativos computarizados</label><br>
+<label><input type="checkbox" class="recursos" value="Mapas"> Mapas</label><br>
+<label><input type="checkbox" class="recursos" value="Otros"> Otros</label>
+</div>
+<div style="margin-top:14px;">
+<button type="submit" class="submit">Enviar Encuesta</button>
+</div>
+</form>
+</div>
+</div>
 <div class="modal" id="modalLogin">
-  <div class="modal-content">
-    <span class="close-btn" onclick="cerrarLogin()">✖ Cerrar</span>
-    <h2>Ingreso Panel Administrativo</h2>
-
-    <input type="email" id="email" placeholder="Correo">
-    <input type="password" id="password" placeholder="Contraseña">
-    <div style="margin-top:10px;">
-      <button onclick="login()">Ingresar</button>
-    </div>
-
-  </div>
+<div class="modal-content">
+<span class="close-btn" onclick="cerrarLogin()">✖ Cerrar</span>
+<h2>Ingreso Panel Administrativo</h2>
+<input type="email" id="email" placeholder="Correo">
+<input type="password" id="password" placeholder="Contraseña">
+<div style="margin-top:10px;">
+<button onclick="login()">Ingresar</button>
 </div>
-
-<!-- MODAL PANEL -->
+</div>
+</div>
 <div class="modal" id="modalPanel">
-  <div class="modal-content">
-    <span class="close-btn" onclick="cerrarPanel()">✖ Cerrar</span>
-    <h2>Panel Estadístico</h2>
+<div class="modal-content">
+<span class="close-btn" onclick="cerrarPanel()">✖ Cerrar</span>
+<h2>Panel Estadístico</h2>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px; align-items: center;">
+<button onclick="logout()">Cerrar Sesión</button>
+<label style="margin:0;">Grado:</label>
+<select id="filtroGrado" style="width: auto;"><option value="">Todos</option></select>
+<label style="margin:0;">Asignatura:</label>
+<select id="filtroAsignatura" style="width: auto;"><option value="">Todas</option></select>
+<button onclick="aplicarFiltros()">Aplicar Filtros</button>
 
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-      <button onclick="logout()">Cerrar Sesión</button>
-      <label style="align-self:center;">Grado:</label>
-      <select id="filtroGrado"><option value="">Todos</option></select>
-
-      <label style="align-self:center;">Asignatura:</label>
-      <select id="filtroAsignatura"><option value="">Todas</option></select>
-
-      <button onclick="aplicarFiltros()">Aplicar Filtros</button>
-    </div>
-
-    <h3>Total Encuestas: <span id="totalEncuestas">0</span></h3>
-    <h3>Promedio General: <span id="promedioGeneral">0</span></h3>
-
-    <canvas id="graficoGeneral" width="800" height="350"></canvas>
-
-  </div>
+<button onclick="exportarExcel()" class="btn-excel"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+<button onclick="exportarPDF()" class="btn-pdf"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
 </div>
 
+<div id="areaImprimir" style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 12px;">
+<h3>Total Encuestas: <span id="totalEncuestas">0</span></h3>
+<h3>Promedio General: <span id="promedioGeneral">0</span></h3>
+<canvas id="graficoGeneral" width="800" height="350"></canvas>
+</div>
+
+</div>
+</div>
 <footer>
 © 2026 I.E.T. San José
 </footer>
-
 <script type="module">
 /* Firebase + Chart imports */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-
 const firebaseConfig = {
-  apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
-  authDomain: "quimicaquest.firebaseapp.com",
-  projectId: "quimicaquest",
-  storageBucket: "quimicaquest.firebasestorage.app",
-  messagingSenderId: "796534851347",
-  appId: "1:796534851347:web:ae85716a8b612d889b3ce6"
+apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
+authDomain: "quimicaquest.firebaseapp.com",
+projectId: "quimicaquest",
+storageBucket: "quimicaquest.firebasestorage.app",
+messagingSenderId: "796534851347",
+appId: "1:796534851347:web:ae85716a8b612d889b3ce6"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
 let datosGlobal = [];
+window.datosFiltrados = []; // Variable global para usar al exportar
 let chart;
 
 /* --- ENCUESTA: envío y guardado --- */
 const formEncuesta = document.getElementById("formEncuesta");
 formEncuesta.addEventListener("submit", async (e)=>{
-  e.preventDefault();
-
-  // recolectar respuestas
-  const jornada = document.getElementById("jornada").value.trim();
-  const grado = document.getElementById("grado").value.trim();
-  const fecha = document.getElementById("fecha").value;
-  const asignatura = document.getElementById("asignatura").value.trim();
-  const establecimiento = document.getElementById("establecimiento").value.trim();
-
-  // q1 (sí/no)
-  const q1 = document.querySelector('input[name="q1"]:checked');
-  if(!q1){ alert("Por favor responda la pregunta 1."); return; }
-
-  // recoger escala 2..19 (validar)
-  const respuestas = {};
-  for(let i=2;i<=19;i++){
-    const sel = document.querySelector(`input[name="q${i}"]:checked`);
-    if(!sel){ alert(`Por favor responda la pregunta ${i}.`); return; }
-    respuestas[`q${i}`] = sel.value;
-  }
-  // incluir q1 en respuestas por consistencia
-  respuestas["q1"] = q1.value;
-
-  // recursos (q20)
-  const recursos = [];
-  document.querySelectorAll(".recursos:checked").forEach(cb=>recursos.push(cb.value));
-
-  const data = {
-    establecimiento,
-    jornada,
-    grado,
-    fecha,
-    asignatura,
-    respuestas,
-    recursos,
-    timestamp: new Date()
-  };
-
-  try{
-    await addDoc(collection(db, "encuestas_estudiantes"), data);
-    alert("✅ Encuesta guardada correctamente en la nube.");
-    // reset formulario opcional:
-    formEncuesta.reset();
-    cerrarEncuesta();
-  }catch(err){
-    console.error(err);
-    alert("❌ Error al guardar la encuesta. Intente nuevamente.");
-  }
+e.preventDefault();
+// recolectar respuestas
+const jornada = document.getElementById("jornada").value.trim();
+const grado = document.getElementById("grado").value.trim();
+const fecha = document.getElementById("fecha").value;
+const asignatura = document.getElementById("asignatura").value.trim();
+const establecimiento = document.getElementById("establecimiento").value.trim();
+// q1 (sí/no)
+const q1 = document.querySelector('input[name="q1"]:checked');
+if(!q1){ alert("Por favor responda la pregunta 1."); return; }
+// recoger escala 2..19 (validar)
+const respuestas = {};
+for(let i=2;i<=19;i++){
+const sel = document.querySelector(`input[name="q${i}"]:checked`);
+if(!sel){ alert(`Por favor responda la pregunta ${i}.`); return; }
+respuestas[`q${i}`] = sel.value;
+}
+// incluir q1 en respuestas por consistencia
+respuestas["q1"] = q1.value;
+// recursos (q20)
+const recursos = [];
+document.querySelectorAll(".recursos:checked").forEach(cb=>recursos.push(cb.value));
+const data = {
+establecimiento,
+jornada,
+grado,
+fecha,
+asignatura,
+respuestas,
+recursos,
+timestamp: new Date()
+};
+try{
+await addDoc(collection(db, "encuestas_estudiantes"), data);
+alert("✅ Encuesta guardada correctamente en la nube.");
+// reset formulario opcional:
+formEncuesta.reset();
+cerrarEncuesta();
+}catch(err){
+console.error(err);
+alert("❌ Error al guardar la encuesta. Intente nuevamente.");
+}
 });
-
 /* --- LOGIN / AUTH --- */
 window.login = async function(){
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  try{
-    await signInWithEmailAndPassword(auth, email, password);
-    cerrarLogin();
-    // abrir panel con datos
-    await cargarDatos(); // carga inicial
-    document.getElementById("modalPanel").style.display = "flex";
-  }catch(err){
-    console.error(err);
-    alert("Credenciales incorrectas o error de conexión.");
-  }
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
+try{
+await signInWithEmailAndPassword(auth, email, password);
+cerrarLogin();
+// abrir panel con datos
+await cargarDatos(); // carga inicial
+document.getElementById("modalPanel").style.display = "flex";
+}catch(err){
+console.error(err);
+alert("Credenciales incorrectas o error de conexión.");
+}
 };
-
 window.logout = async function(){
-  try{
-    await signOut(auth);
-    alert("Sesión cerrada.");
-    cerrarPanel();
-  }catch(e){ console.error(e); }
+try{
+await signOut(auth);
+alert("Sesión cerrada.");
+cerrarPanel();
+}catch(e){ console.error(e); }
 };
-
 onAuthStateChanged(auth, user=>{
-  if(!user){
-    // si usuario se desconecta, cerrar panel
-    cerrarPanel();
-  }
+if(!user){
+// si usuario se desconecta, cerrar panel
+cerrarPanel();
+}
 });
 
 /* --- PANEL: carga y graficado --- */
 export async function cargarDatos(){ /* keep exported to allow use from login flow */ }
 window.cargarDatos = async function(){
-  try{
-    const snapshot = await getDocs(collection(db,"encuestas_estudiantes"));
-    datosGlobal = [];
-    snapshot.forEach(doc => datosGlobal.push(doc.data()));
-    poblarFiltros();
-    aplicarFiltros();
-  }catch(e){
-    console.error("Error leyendo encuestas:", e);
-    alert("Error leyendo encuestas desde la nube.");
-  }
+try{
+const snapshot = await getDocs(collection(db,"encuestas_estudiantes"));
+datosGlobal = [];
+snapshot.forEach(doc => datosGlobal.push(doc.data()));
+poblarFiltros();
+aplicarFiltros();
+}catch(e){
+console.error("Error leyendo encuestas:", e);
+alert("Error leyendo encuestas desde la nube.");
+}
 };
 
 window.aplicarFiltros = function(){
-  const gradoFiltro = document.getElementById("filtroGrado").value;
-  const asignaturaFiltro = document.getElementById("filtroAsignatura").value;
+const gradoFiltro = document.getElementById("filtroGrado").value;
+const asignaturaFiltro = document.getElementById("filtroAsignatura").value;
 
-  let filtrados = datosGlobal.filter(d=>{
-    return (gradoFiltro==="" || d.grado===gradoFiltro) &&
-           (asignaturaFiltro==="" || d.asignatura===asignaturaFiltro);
-  });
+window.datosFiltrados = datosGlobal.filter(d=>{
+return (gradoFiltro==="" || d.grado===gradoFiltro) &&
+(asignaturaFiltro==="" || d.asignatura===asignaturaFiltro);
+});
 
-  document.getElementById("totalEncuestas").innerText = filtrados.length;
-
-  let conteo = {Nunca:0,"Algunas veces":0,"Casi siempre":0,Siempre:0};
-  let suma=0,totalRespuestas=0;
-
-  filtrados.forEach(d=>{
-    const respObj = d.respuestas || {};
-    Object.values(respObj).forEach(r=>{
-      if(conteo.hasOwnProperty(r)) conteo[r]++;
-      // convertir a escala numérica: Nunca=1 ... Siempre=4
-      suma += (r==="Nunca"?1:r==="Algunas veces"?2:r==="Casi siempre"?3:r==="Siempre"?4:0);
-      totalRespuestas++;
-    });
-  });
-
-  const promedio = totalRespuestas>0 ? (suma/totalRespuestas).toFixed(2) : 0;
-  document.getElementById("promedioGeneral").innerText = promedio;
-
-  generarGrafico(conteo);
+document.getElementById("totalEncuestas").innerText = window.datosFiltrados.length;
+let conteo = {Nunca:0,"Algunas veces":0,"Casi siempre":0,Siempre:0};
+let suma=0,totalRespuestas=0;
+window.datosFiltrados.forEach(d=>{
+const respObj = d.respuestas || {};
+Object.values(respObj).forEach(r=>{
+if(conteo.hasOwnProperty(r)) conteo[r]++;
+// convertir a escala numérica: Nunca=1 ... Siempre=4
+suma += (r==="Nunca"?1:r==="Algunas veces"?2:r==="Casi siempre"?3:r==="Siempre"?4:0);
+totalRespuestas++;
+});
+});
+const promedio = totalRespuestas>0 ? (suma/totalRespuestas).toFixed(2) : 0;
+document.getElementById("promedioGeneral").innerText = promedio;
+generarGrafico(conteo);
 };
 
 function generarGrafico(conteo){
-  const ctx = document.getElementById("graficoGeneral");
-  if(chart) chart.destroy();
-  chart = new Chart(ctx, {
-      type:'bar',
-      data:{
-        labels: Object.keys(conteo),
-        datasets:[{
-          label: 'Distribución de respuestas (suma preguntas)',
-          data: Object.values(conteo),
-          backgroundColor: ['#f94144','#f3722c','#f9c74f','#90be6d']
-        }]
-      },
-      options:{
-        responsive:true,
-        scales:{ y:{ beginAtZero:true } }
-      }
-  });
+const ctx = document.getElementById("graficoGeneral");
+if(chart) chart.destroy();
+chart = new Chart(ctx, {
+type:'bar',
+data:{
+labels: Object.keys(conteo),
+datasets:[{
+label: 'Distribución de respuestas (suma preguntas)',
+data: Object.values(conteo),
+backgroundColor: ['#f94144','#f3722c','#f9c74f','#90be6d']
+}]
+},
+options:{
+responsive:true,
+scales:{ y:{ beginAtZero:true } }
+}
+});
 }
 
 function poblarFiltros(){
-  const selGrado = document.getElementById("filtroGrado");
-  const selAsig = document.getElementById("filtroAsignatura");
-  selGrado.innerHTML = '<option value="">Todos</option>';
-  selAsig.innerHTML = '<option value="">Todas</option>';
+const selGrado = document.getElementById("filtroGrado");
+const selAsig = document.getElementById("filtroAsignatura");
+selGrado.innerHTML = '<option value="">Todos</option>';
+selAsig.innerHTML = '<option value="">Todas</option>';
+const grados = [...new Set(datosGlobal.map(d=>d.grado).filter(Boolean))].sort();
+const asignaturas = [...new Set(datosGlobal.map(d=>d.asignatura).filter(Boolean))].sort();
+grados.forEach(g => selGrado.innerHTML += `<option value="${g}">${g}</option>`);
+asignaturas.forEach(a => selAsig.innerHTML += `<option value="${a}">${a}</option>`);
+};
 
-  const grados = [...new Set(datosGlobal.map(d=>d.grado).filter(Boolean))].sort();
-  const asignaturas = [...new Set(datosGlobal.map(d=>d.asignatura).filter(Boolean))].sort();
+/* --- LÓGICA DE EXPORTACIÓN --- */
+window.exportarExcel = function() {
+    if(!window.datosFiltrados || window.datosFiltrados.length === 0) {
+        alert("No hay datos para exportar.");
+        return;
+    }
+    
+    // Mapear los datos para aplanarlos en columnas
+    const datosExcel = window.datosFiltrados.map(d => {
+        let fila = {
+            Establecimiento: d.establecimiento,
+            Jornada: d.jornada,
+            Grado: d.grado,
+            Asignatura: d.asignatura,
+            Fecha: d.fecha,
+            "P1(Sí/No)": d.respuestas?.q1 || ''
+        };
+        // Agregar las respuestas 2 a 19 dinámicamente
+        for(let i = 2; i <= 19; i++) {
+            fila[`Pregunta_${i}`] = d.respuestas?.[`q${i}`] || '';
+        }
+        // Unir recursos seleccionados
+        fila.Recursos = d.recursos ? d.recursos.join(', ') : '';
+        return fila;
+    });
 
-  grados.forEach(g => selGrado.innerHTML += `<option value="${g}">${g}</option>`);
-  asignaturas.forEach(a => selAsig.innerHTML += `<option value="${a}">${a}</option>`);
+    // Crear libro de trabajo y guardarlo
+    const hoja = XLSX.utils.json_to_sheet(datosExcel);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Encuestas_Filtradas");
+    XLSX.writeFile(libro, "Reporte_Encuestas_SJ.xlsx");
+};
+
+window.exportarPDF = async function() {
+    const elemento = document.getElementById("areaImprimir");
+    const { jsPDF } = window.jspdf;
+
+    try {
+        // Capturar la sección de datos y la gráfica en una imagen, conservando el fondo
+        const canvas = await html2canvas(elemento, { 
+            scale: 2, 
+            backgroundColor: "#114c23" // Color de fondo del modal para contraste
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        
+        // Calcular dimensiones manteniendo la proporción
+        const pdfWidth = pdf.internal.pageSize.getWidth() - 20; // 10mm de margen por lado
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        
+        // Agregar Título e información de los filtros usados al PDF
+        pdf.setFontSize(16);
+        pdf.text("Informe Estadístico de Encuestas - I.E.T. San José", 10, 15);
+        
+        pdf.setFontSize(11);
+        const grado = document.getElementById("filtroGrado").value || 'Todos';
+        const asig = document.getElementById("filtroAsignatura").value || 'Todas';
+        pdf.text(`Filtro aplicado -> Grado: ${grado} | Asignatura: ${asig}`, 10, 23);
+        
+        // Insertar la imagen de las estadísticas
+        pdf.addImage(imgData, 'PNG', 10, 32, pdfWidth, pdfHeight);
+        pdf.save("Reporte_Grafico_SJ.pdf");
+        
+    } catch(err) {
+        console.error("Error al exportar PDF: ", err);
+        alert("Ocurrió un error al generar el PDF.");
+    }
 };
 
 /* expose cargarDatos to use after login */
 window.cargarDatos = window.cargarDatos || window.cargarDatos;
-
-/* initial no-op cargarDatos only when panel opened after login */
 </script>
-
 <script>
 /* UI helpers (non-module) */
 function abrirLabs(){ document.getElementById("modalLabs").style.display="flex"; }
 function cerrarLabs(){ document.getElementById("modalLabs").style.display="none"; }
-
 function abrirEncuesta(){ document.getElementById("modalEncuesta").style.display="flex"; }
 function cerrarEncuesta(){ document.getElementById("modalEncuesta").style.display="none"; }
-
 function abrirLogin(){ document.getElementById("modalLogin").style.display="flex"; }
 function cerrarLogin(){ document.getElementById("modalLogin").style.display="none"; }
-
 function abrirPanel(){ /* open panel only if logged in */
-  // Try to detect current auth state via Firebase Auth (onAuthStateChanged handles closing)
-  // We trigger login modal to force auth if not logged
-  document.getElementById("modalLogin").style.display="flex";
+document.getElementById("modalLogin").style.display="flex";
 }
 function cerrarPanel(){ document.getElementById("modalPanel").style.display="none"; }
 </script>
-
 </body>
 </html>
