@@ -392,6 +392,18 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
         <p>Haz click para elegir laboratorio</p>
     </div>
     
+    <div class="menu-card" onclick="window.open('https://sedtolimaedu-my.sharepoint.com/:f:/g/personal/edison_avendano_sedtolima_edu_co/IgDYigqdoVH1TZ2j4l1sqdAAAaDbR27cLJJhdXkSb4yQRKY?e=1c3Fdl', '_blank')">
+        <i class="fas fa-folder-open"></i>
+        <h3>Material de Apoyo</h3>
+        <p>Guías, talleres y documentos</p>
+    </div>
+
+    <div class="menu-card" onclick="abrirAnuncios()">
+        <i class="fas fa-bullhorn"></i>
+        <h3>Tablero de Anuncios</h3>
+        <p>Novedades y recordatorios</p>
+    </div>
+    
     <div class="menu-card" onclick="abrirCredenciales()">
         <i class="fas fa-id-card"></i>
         <h3>Consultar Credenciales</h3>
@@ -415,14 +427,38 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
     </div>
 </div>
 
+<div class="modal" id="modalAnuncios">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="close-btn" onclick="cerrarAnuncios()"><i class="fas fa-times"></i></div>
+        <h2><i class="fas fa-bullhorn"></i> Anuncios y Novedades</h2>
+        <p class="small-note">Mantente al día con las últimas noticias de la clase.</p>
+        
+        <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
+            
+            <div style="background: rgba(0,0,0,0.2); border-left: 4px solid var(--amarillo); padding: 15px; border-radius: 8px;">
+                <h4 style="color: var(--amarillo); margin-bottom: 5px;">¡Bienvenidos al Entorno Virtual!</h4>
+                <p style="font-size: 0.95rem; margin-bottom: 5px;">Ya pueden consultar sus contraseñas en la sección "Consultar Credenciales". Recuerden que necesitarán su Código ZipGrade y su Apellido para ingresar.</p>
+                <span style="font-size: 0.8rem; opacity: 0.6;"><i class="far fa-calendar-alt"></i> Publicado recientemente</span>
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.2); border-left: 4px solid #20c997; padding: 15px; border-radius: 8px;">
+                <h4 style="color: #20c997; margin-bottom: 5px;">Nuevo Material Disponible</h4>
+                <p style="font-size: 0.95rem; margin-bottom: 5px;">Se ha subido la guía de estudio para esta semana en la carpeta de <strong>Material de Apoyo</strong>. Por favor, revísenla antes de la próxima clase.</p>
+                <span style="font-size: 0.8rem; opacity: 0.6;"><i class="far fa-calendar-alt"></i> Recordatorio</span>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <div class="modal" id="modalCredenciales">
     <div class="modal-content" style="max-width: 500px;">
         <div class="close-btn" onclick="cerrarCredenciales()"><i class="fas fa-times"></i></div>
         <h2><i class="fas fa-id-card"></i> Tus Credenciales</h2>
         <p class="small-note">Para proteger tu privacidad, ingresa tu Código ZipGrade ID y tu primer apellido.</p>
         
-        <input type="text" id="inputZipGrade" placeholder="Código ZipGrade ID (Ej: 102342026)">
-        <input type="text" id="inputApellido" placeholder="Primer Apellido (Ej: RODRIGUEZ)">
+        <input type="text" id="inputZipGrade" placeholder="Código ZipGrade ID (Ej: 112142026)">
+        <input type="text" id="inputApellido" placeholder="Primer Apellido (Ej: LLANO)">
         
         <button onclick="buscarEstudiante()" style="width: 100%; margin-top: 10px;"><i class="fas fa-search"></i> Consultar</button>
         
@@ -1007,6 +1043,11 @@ function abrirCredenciales(){
 function cerrarCredenciales(){ 
     document.getElementById("modalCredenciales").style.display="none"; 
 }
+
+/* Helpers Anuncios */
+function abrirAnuncios(){ document.getElementById("modalAnuncios").style.display="flex"; }
+function cerrarAnuncios(){ document.getElementById("modalAnuncios").style.display="none"; }
+
 
 function buscarEstudiante() {
     const inputZip = document.getElementById("inputZipGrade").value.trim();
