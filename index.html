@@ -283,7 +283,7 @@ h3 { margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid var(--borde
 /* Área Imprimir PDF */
 #areaImprimir {
     padding: 20px;
-    background: var(--verde-claro); /* Fondo sólido para el PDF */
+    background: var(--verde-claro);
     border-radius: 15px;
     border: 1px solid rgba(255,255,255,0.1);
 }
@@ -418,13 +418,15 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
 <div class="modal" id="modalCredenciales">
     <div class="modal-content" style="max-width: 500px;">
         <div class="close-btn" onclick="cerrarCredenciales()"><i class="fas fa-times"></i></div>
-        <h2><i class="fas fa-search"></i> Tus Credenciales</h2>
-        <p class="small-note">Escribe tu nombre o apellido para encontrar tus datos de acceso.</p>
+        <h2><i class="fas fa-id-card"></i> Tus Credenciales</h2>
+        <p class="small-note">Para proteger tu privacidad, ingresa tu Código ZipGrade ID y tu primer apellido.</p>
         
-        <input type="text" id="busquedaEstudiante" placeholder="Escribe tu nombre o apellido..." onkeyup="buscarEstudiante()">
+        <input type="text" id="inputZipGrade" placeholder="Código ZipGrade ID (Ej: 102342026)">
+        <input type="text" id="inputApellido" placeholder="Primer Apellido (Ej: RODRIGUEZ)">
         
-        <div id="resultadosCredenciales" style="max-height: 400px; overflow-y: auto; margin-top: 15px;">
-            <p class="small-note" style="text-align: center;">Comienza a escribir para buscar...</p>
+        <button onclick="buscarEstudiante()" style="width: 100%; margin-top: 10px;"><i class="fas fa-search"></i> Consultar</button>
+        
+        <div id="resultadosCredenciales" style="max-height: 400px; overflow-y: auto; margin-top: 20px;">
         </div>
     </div>
 </div>
@@ -998,45 +1000,51 @@ function cerrarPanel(){ document.getElementById("modalPanel").style.display="non
 /* Helpers Consultar Credenciales */
 function abrirCredenciales(){ 
     document.getElementById("modalCredenciales").style.display="flex"; 
-    document.getElementById("busquedaEstudiante").value = "";
-    document.getElementById("resultadosCredenciales").innerHTML = '<p class="small-note" style="text-align: center;">Comienza a escribir para buscar...</p>';
+    document.getElementById("inputZipGrade").value = "";
+    document.getElementById("inputApellido").value = "";
+    document.getElementById("resultadosCredenciales").innerHTML = '';
 }
 function cerrarCredenciales(){ 
     document.getElementById("modalCredenciales").style.display="none"; 
 }
 
 function buscarEstudiante() {
-    const texto = document.getElementById("busquedaEstudiante").value.toLowerCase().trim();
+    const inputZip = document.getElementById("inputZipGrade").value.trim();
+    const inputApellido = document.getElementById("inputApellido").value.toLowerCase().trim();
     const resultadosDiv = document.getElementById("resultadosCredenciales");
     
-    // Solo busca si ha tecleado más de 2 letras
-    if (texto.length < 3) {
-        resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center;'>Escribe al menos 3 letras para buscar...</p>";
+    if (!inputZip || !inputApellido) {
+        resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa ambos datos para buscar.</p>";
         return;
     }
     
-    // Filtramos en base al Nombre o Apellido
+    // Doble validación: coincidencia exacta del ZipGrade ID y que el apellido esté incluido
     const filtrados = window.estudiantesData.filter(est => {
-        const nombreCompleto = (est["First Name"] + " " + est["Last Name"]).toLowerCase();
-        return nombreCompleto.includes(texto);
+        const idCoincide = est["ZipGrade ID"].toString() === inputZip;
+        const apellidoCoincide = est["Last Name"].toLowerCase().includes(inputApellido);
+        return idCoincide && apellidoCoincide;
     });
     
     if (filtrados.length === 0) {
-        resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center;'>No se encontraron estudiantes con ese nombre.</p>";
+        resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ff4757;'>❌ Datos incorrectos. Verifica tu Código ZipGrade y Apellido.</p>";
         return;
     }
     
     let html = '<div class="stats-grid" style="gap:10px; margin-top:15px; grid-template-columns: 1fr;">';
     filtrados.forEach(est => {
         html += `
-        <div class="stat-box" style="text-align:left; background:rgba(0,0,0,0.3); padding: 15px;">
+        <div class="stat-box" style="text-align:left; background:rgba(0,0,0,0.3); padding: 15px; border-left: 4px solid var(--amarillo);">
             <h4 style="color:var(--amarillo); margin-bottom:5px; font-size:1.1rem;">${est["First Name"]} ${est["Last Name"]}</h4>
             <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Clase:</strong> ${est["Classes"]}</p>
-            <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Código ZipGrade ID:</strong> ${est["ZipGrade ID"]}</p>
-            <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Contraseña:</strong> <span style="background:var(--verde-claro); padding:3px 8px; border-radius:5px; font-family: monospace;">${est["Access Code"]}</span></p>
+            <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Contraseña de Acceso:</strong> <span style="background:var(--verde-claro); padding:3px 8px; border-radius:5px; font-family: monospace; font-size: 1.1rem;">${est["Access Code"]}</span></p>
         </div>`;
     });
     html += '</div>';
+    
+    // Limpiar los campos por seguridad
+    document.getElementById("inputZipGrade").value = "";
+    document.getElementById("inputApellido").value = "";
+    
     resultadosDiv.innerHTML = html;
 }
 </script>
