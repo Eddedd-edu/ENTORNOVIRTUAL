@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Entorno Virtual I.E.T. San José</title>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 :root{
@@ -34,33 +36,30 @@ header p{opacity:0.8;}
     width:100%;
     max-width:1200px;
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
     gap:20px;
 }
 
 .menu-card{
     background:rgba(255,255,255,0.08);
-    backdrop-filter:blur(12px);
     padding:30px 20px;
     border-radius:20px;
     text-align:center;
     cursor:pointer;
-    transition:0.4s;
-    border:1px solid rgba(255,255,255,0.1);
+    transition:0.3s;
 }
 
 .menu-card:hover{
-    transform:translateY(-8px) scale(1.04);
-    box-shadow:0 15px 30px rgba(0,0,0,0.4);
+    transform:translateY(-6px);
+    box-shadow:0 10px 25px rgba(0,0,0,0.4);
 }
 
 .menu-card i{
-    font-size:2.2rem;
+    font-size:2rem;
     color:var(--amarillo);
-    margin-bottom:15px;
+    margin-bottom:12px;
 }
 
-/* MODAL */
 .modal{
     display:none;
     position:fixed;
@@ -74,10 +73,10 @@ header p{opacity:0.8;}
 }
 
 .modal-content{
-    background:rgba(20,90,42,0.97);
+    background:#145a2a;
     padding:30px;
     border-radius:20px;
-    max-width:900px;
+    max-width:1000px;
     width:100%;
     max-height:90vh;
     overflow-y:auto;
@@ -89,37 +88,37 @@ header p{opacity:0.8;}
     color:var(--amarillo);
 }
 
-.question{margin-bottom:15px;}
-.question label{margin-right:10px;display:inline-block;}
-
-input[type="text"], input[type="date"]{
-    width:100%;
-    margin:5px 0;
+input, select{
     padding:6px;
+    margin:5px 0;
+    width:100%;
 }
 
-button.submit{
-    background:var(--amarillo);
+button{
+    padding:8px 15px;
     border:none;
-    padding:10px 20px;
-    border-radius:10px;
-    font-weight:bold;
+    border-radius:8px;
     cursor:pointer;
-    margin-top:15px;
+    background:var(--amarillo);
+    font-weight:bold;
 }
 
-footer{
-    margin-top:30px;
-    opacity:0.6;
+canvas{
+    background:#fff;
+    border-radius:12px;
+    padding:10px;
+    margin-top:20px;
 }
+
+footer{margin-top:30px;opacity:0.6;}
 </style>
 </head>
 
 <body>
 
 <header>
-    <img src="logo.png" alt="Escudo">
-    <h1>ENTORNO VIRTUAL</h1>
+    <img src="logo.png">
+    <h1>ENTORNO VIRTUAL SJ</h1>
     <p>I.E.T. San José - Fresno Tolima</p>
 </header>
 
@@ -135,14 +134,14 @@ footer{
         <h3>Evaluación Docente</h3>
     </div>
 
-    <div class="menu-card" onclick="abrirEncuesta()">
-        <i class="fas fa-clipboard-list"></i>
-        <h3>Encuesta Estudiantes</h3>
+    <div class="menu-card" onclick="abrirLogin()">
+        <i class="fas fa-chart-bar"></i>
+        <h3>Panel Estadístico</h3>
     </div>
 
 </div>
 
-<!-- MODAL LABS -->
+<!-- MODAL LABORATORIOS -->
 <div class="modal" id="modalLabs">
 <div class="modal-content">
 <span class="close-btn" onclick="cerrarLabs()">✖ Cerrar</span>
@@ -152,67 +151,63 @@ footer{
 <i class="fas fa-wind"></i>
 <h3>Leyes de los Gases</h3>
 </div>
+
 <br>
+
 <div class="menu-card" onclick="window.open('https://eddedd-edu.github.io/Lab-Atomo/')">
 <i class="fas fa-atom"></i>
 <h3>Laboratorio del Átomo</h3>
 </div>
+
 </div>
 </div>
 
-<!-- MODAL ENCUESTA -->
-<div class="modal" id="modalEncuesta">
+<!-- MODAL LOGIN -->
+<div class="modal" id="modalLogin">
 <div class="modal-content">
+<span class="close-btn" onclick="cerrarLogin()">✖ Cerrar</span>
+<h2>Ingreso Panel Administrativo</h2>
 
-<span class="close-btn" onclick="cerrarEncuesta()">✖ Cerrar</span>
-<h2>Encuesta a Estudiantes</h2>
+<input type="email" id="email" placeholder="Correo">
+<input type="password" id="password" placeholder="Contraseña">
+<button onclick="login()">Ingresar</button>
 
-<form id="formEncuesta">
-
-<h3>Datos Generales</h3>
-<input type="text" id="jornada" placeholder="Jornada" required>
-<input type="text" id="grado" placeholder="Grado y Curso" required>
-<input type="date" id="fecha" required>
-<input type="text" id="asignatura" placeholder="Asignatura" required>
-
-<!-- PREGUNTA 1 -->
-<div class="question">
-<h4>1. Entregó el programa al inicio del curso</h4>
-<label><input type="radio" name="q1" value="Si" required> Sí</label>
-<label><input type="radio" name="q1" value="No"> No</label>
+</div>
 </div>
 
-<div id="preguntasDinamicas"></div>
+<!-- MODAL PANEL -->
+<div class="modal" id="modalPanel">
+<div class="modal-content">
+<span class="close-btn" onclick="cerrarPanel()">✖ Cerrar</span>
+<h2>Panel Estadístico</h2>
 
-<h4>20. Recursos utilizados</h4>
-<div class="question">
-<label><input type="checkbox" value="Tablero" class="recursos"> Tablero</label>
-<label><input type="checkbox" value="Películas y videos" class="recursos"> Películas y videos</label>
-<label><input type="checkbox" value="Láminas" class="recursos"> Láminas y gráficos</label>
-<label><input type="checkbox" value="Computadores" class="recursos"> Computadores</label>
-<label><input type="checkbox" value="Diapositivas" class="recursos"> Diapositivas</label>
-<label><input type="checkbox" value="Música" class="recursos"> Música</label>
-<label><input type="checkbox" value="Libros de texto" class="recursos"> Libros de texto</label>
-<label><input type="checkbox" value="Laboratorios" class="recursos"> Laboratorios</label>
-<label><input type="checkbox" value="Programas educativos" class="recursos"> Programas educativos</label>
-<label><input type="checkbox" value="Mapas" class="recursos"> Mapas</label>
-<label><input type="checkbox" value="Otros" class="recursos"> Otros</label>
-</div>
+<button onclick="logout()">Cerrar Sesión</button>
 
-<button type="submit" class="submit">Enviar Encuesta</button>
+<label>Grado:</label>
+<select id="filtroGrado"><option value="">Todos</option></select>
 
-</form>
+<label>Asignatura:</label>
+<select id="filtroAsignatura"><option value="">Todas</option></select>
+
+<button onclick="aplicarFiltros()">Aplicar Filtros</button>
+
+<h3>Total Encuestas: <span id="totalEncuestas">0</span></h3>
+<h3>Promedio General: <span id="promedioGeneral">0</span></h3>
+
+<canvas id="graficoGeneral"></canvas>
+
 </div>
 </div>
 
 <footer>
-© 2026 I.E.T. San José | Nil Difficile Volenti
+© 2026 I.E.T. San José
 </footer>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
@@ -225,81 +220,93 @@ appId: "1:796534851347:web:ae85716a8b612d889b3ce6"
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-const preguntas = [
-"Presenta los temas con claridad",
-"Comunica objetivos de cada clase",
-"Responde dudas en clase",
-"Expresa expectativas positivas",
-"Explica criterios de evaluación",
-"Evalúa adecuadamente",
-"Programa salidas pedagógicas",
-"Atiende dudas fuera de clase",
-"Realiza actividades de recuperación",
-"Indica normas claras",
-"Es respetado por estudiantes",
-"Realiza clases activas y dinámicas",
-"Informa a padres de familia",
-"Llega puntual y orienta adecuadamente",
-"Son interesantes",
-"Empiezan y terminan a tiempo",
-"Desarrollan temas en tiempo indicado",
-"Tratan temas importantes para la comunidad"
-];
+let datosGlobal = [];
+let chart;
 
-function escala(nombre){
-return `
-<label><input type="radio" name="${nombre}" value="Nunca" required> Nunca</label>
-<label><input type="radio" name="${nombre}" value="Algunas veces"> Algunas veces</label>
-<label><input type="radio" name="${nombre}" value="Casi siempre"> Casi siempre</label>
-<label><input type="radio" name="${nombre}" value="Siempre"> Siempre</label>
-`;
-}
+window.login = async function(){
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-preguntas.forEach((p,i)=>{
-document.getElementById("preguntasDinamicas").innerHTML +=
-`<div class="question">
-<h4>${i+2}. ${p}</h4>
-${escala("q"+(i+2))}
-</div>`;
-});
-
-document.getElementById("formEncuesta").addEventListener("submit", async (e)=>{
-e.preventDefault();
-
-let respuestas = {};
-for(let i=1;i<=19;i++){
-respuestas["q"+i] = document.querySelector(`input[name="q${i}"]:checked`).value;
-}
-
-let recursosSeleccionados = [];
-document.querySelectorAll(".recursos:checked").forEach(r=>{
-recursosSeleccionados.push(r.value);
-});
-
-const data = {
-jornada: document.getElementById("jornada").value,
-grado: document.getElementById("grado").value,
-fecha: document.getElementById("fecha").value,
-asignatura: document.getElementById("asignatura").value,
-respuestas: respuestas,
-recursos: recursosSeleccionados,
-timestamp: new Date()
+    try{
+        await signInWithEmailAndPassword(auth,email,password);
+        cerrarLogin();
+        abrirPanel();
+    }catch(error){
+        alert("Credenciales incorrectas");
+    }
 };
 
-await addDoc(collection(db, "encuestas_estudiantes"), data);
+window.logout = async function(){
+    await signOut(auth);
+    cerrarPanel();
+};
 
-alert("✅ Encuesta guardada correctamente en la nube");
-cerrarEncuesta();
+onAuthStateChanged(auth,user=>{
+    if(!user){
+        document.getElementById("modalPanel").style.display="none";
+    }
 });
+
+window.abrirPanel = async function(){
+    document.getElementById("modalPanel").style.display="flex";
+    await cargarDatos();
+};
+
+async function cargarDatos(){
+    const snapshot = await getDocs(collection(db,"encuestas_estudiantes"));
+    datosGlobal = [];
+    snapshot.forEach(doc=>datosGlobal.push(doc.data()));
+    aplicarFiltros();
+}
+
+window.aplicarFiltros = function(){
+    let filtrados = datosGlobal;
+
+    document.getElementById("totalEncuestas").innerText = filtrados.length;
+
+    let conteo = {Nunca:0,"Algunas veces":0,"Casi siempre":0,Siempre:0};
+    let suma=0,total=0;
+
+    filtrados.forEach(d=>{
+        Object.values(d.respuestas).forEach(r=>{
+            conteo[r]++;
+            suma += (r==="Nunca"?1:r==="Algunas veces"?2:r==="Casi siempre"?3:4);
+            total++;
+        });
+    });
+
+    document.getElementById("promedioGeneral").innerText = total>0?(suma/total).toFixed(2):0;
+
+    generarGrafico(conteo);
+};
+
+function generarGrafico(conteo){
+    const ctx = document.getElementById("graficoGeneral");
+    if(chart) chart.destroy();
+
+    chart = new Chart(ctx,{
+        type:'bar',
+        data:{
+            labels:Object.keys(conteo),
+            datasets:[{
+                label:"Distribución de Respuestas",
+                data:Object.values(conteo),
+                backgroundColor:['#f94144','#f3722c','#f9c74f','#90be6d']
+            }]
+        }
+    });
+}
 
 </script>
 
 <script>
-function abrirEncuesta(){document.getElementById("modalEncuesta").style.display="flex";}
-function cerrarEncuesta(){document.getElementById("modalEncuesta").style.display="none";}
 function abrirLabs(){document.getElementById("modalLabs").style.display="flex";}
 function cerrarLabs(){document.getElementById("modalLabs").style.display="none";}
+function abrirLogin(){document.getElementById("modalLogin").style.display="flex";}
+function cerrarLogin(){document.getElementById("modalLogin").style.display="none";}
+function cerrarPanel(){document.getElementById("modalPanel").style.display="none";}
 </script>
 
 </body>
