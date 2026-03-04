@@ -342,6 +342,29 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
     .stats-grid { grid-template-columns: 1fr 1fr; }
 }
 </style>
+
+<script>
+    window.listaPreguntas = [
+        "Presenta los temas con mucha claridad",
+        "Comunica claramente los objetivos de cada clase",
+        "Responde las dudas de los estudiantes en clase",
+        "Expresa expectativas positivas de los estudiantes",
+        "Explica los criterios de evaluación de la materia",
+        "Evalúa adecuadamente la materia",
+        "Programa y coordina salidas pedagógicas",
+        "Atiende dudas académicas fuera de clase",
+        "Realiza actividades de recuperación y refuerzo",
+        "Indica normas de comportamiento claras",
+        "Es respetado por todos los estudiantes",
+        "Realiza clases activas y dinámicas",
+        "Informa a padres sobre el desempeño",
+        "Sus orientaciones son seguidas por todos",
+        "Las clases son interesantes y llamativas",
+        "Empiezan y terminan a la hora indicada",
+        "Desarrollan los temas en el tiempo indicado",
+        "Tratan temas importantes para la comunidad"
+    ];
+</script>
 </head>
 <body>
 
@@ -432,33 +455,12 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
 
             <h3>EL PROFESOR</h3>
             <script>
-                const preguntas = [
-                    "2. Presenta los temas con mucha claridad",
-                    "3. Comunica claramente los objetivos de cada clase",
-                    "4. Responde las dudas de los estudiantes en clase",
-                    "5. Expresa expectativas positivas de los estudiantes",
-                    "6. Explica los criterios de evaluación de la materia",
-                    "7. Evalúa adecuadamente la materia",
-                    "8. Programa y coordina salidas pedagógicas como complemento a la materia",
-                    "9. Atiende dudas académicas de los estudiantes fuera de clase",
-                    "10. Realiza actividades de recuperación y refuerzo con estudiantes que lo necesitan",
-                    "11. Indica normas de comportamiento en clase claras para todos",
-                    "12. Es respetado por todos los estudiantes del curso",
-                    "13. Realiza clases activas y dinámicas",
-                    "14. Informa a padres de familia y acudientes sobre el desempeño de los estudiantes",
-                    "15. Llega a clase y sus orientaciones son seguidas por todos los estudiantes",
-                    "16. Son interesantes porque tratan temas llamativos",
-                    "17. Empiezan y terminan a la hora indicada",
-                    "18. Desarrollan los temas propuestos en el tiempo indicado",
-                    "19. Tratan temas importantes para el barrio, la zona o la comunidad"
-                ];
-
-                preguntas.forEach((pregunta, index) => {
+                window.listaPreguntas.forEach((pregunta, index) => {
                     const qNum = index + 2;
                     if(qNum === 16) document.write('<h3>LAS CLASES</h3>');
                     document.write(`
                         <div class="question">
-                            <h4>${pregunta}</h4>
+                            <h4>${qNum}. ${pregunta}</h4>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
                                 <label><input type="radio" name="q${qNum}" value="Nunca" required> Nunca</label>
                                 <label><input type="radio" name="q${qNum}" value="Algunas veces"> Algunas veces</label>
@@ -511,13 +513,14 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
         
         <div class="filter-bar">
             <button onclick="logout()" class="btn-danger"><i class="fas fa-power-off"></i> Salir</button>
-            <div style="flex-grow: 1;"></div> <label style="margin:0; font-weight: 500;">Grado:</label>
+            <div style="flex-grow: 1;"></div> 
+            <label style="margin:0; font-weight: 500;">Grado:</label>
             <select id="filtroGrado"><option value="">Todos</option></select>
             <label style="margin:0; font-weight: 500;">Asignatura:</label>
             <select id="filtroAsignatura"><option value="">Todas</option></select>
             <button onclick="aplicarFiltros()"><i class="fas fa-filter"></i> Filtrar</button>
             <button onclick="exportarExcel()" class="btn-excel"><i class="fas fa-file-excel"></i> Excel</button>
-            <button onclick="exportarPDF()" class="btn-pdf"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button onclick="exportarPDF()" class="btn-pdf"><i class="fas fa-file-pdf"></i> Informe PDF</button>
         </div>
 
         <div id="areaImprimir">
@@ -545,7 +548,6 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
 </footer>
 
 <script type="module">
-/* Firebase + Chart imports */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
@@ -618,7 +620,6 @@ window.login = async function(){
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
     
-    // Cambiamos el texto del botón para que sepas que está cargando
     const btn = document.querySelector('#modalLogin button');
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
@@ -626,7 +627,6 @@ window.login = async function(){
     try{
         await signInWithEmailAndPassword(auth, email, password);
         cerrarLogin();
-        // LLAMADA CORREGIDA: Usamos window.cargarDatos() explícitamente
         await window.cargarDatos(); 
         document.getElementById("modalPanel").style.display = "flex";
     }catch(err){
@@ -638,15 +638,11 @@ window.login = async function(){
 };
 
 /* --- PANEL: carga y graficado --- */
-// ELIMINAMOS el "export async function..." que estaba causando conflicto
 window.cargarDatos = async function(){
     try{
         const snapshot = await getDocs(collection(db,"encuestas_estudiantes"));
         datosGlobal = [];
         snapshot.forEach(doc => datosGlobal.push(doc.data()));
-        
-        console.log("Datos descargados:", datosGlobal); // Para verificar en la consola
-        
         poblarFiltros();
         aplicarFiltros();
     }catch(e){
@@ -686,7 +682,6 @@ function generarGrafico(conteo){
     const ctx = document.getElementById("graficoGeneral");
     if(chart) chart.destroy();
     
-    // Configuración por defecto global de Chart.js
     Chart.defaults.color = '#ffffff';
     Chart.defaults.font.family = "'Poppins', sans-serif";
 
@@ -763,39 +758,187 @@ window.exportarExcel = function() {
     XLSX.writeFile(libro, "Reporte_SanJose.xlsx");
 };
 
+/* --- NUEVO INFORME PDF COMPLETO --- */
 window.exportarPDF = async function() {
-    const elemento = document.getElementById("areaImprimir");
+    if(!window.datosFiltrados || window.datosFiltrados.length === 0) {
+        alert("No hay datos para generar el informe.");
+        return;
+    }
+
     const btnPdf = document.querySelector('.btn-pdf');
     const originalText = btnPdf.innerHTML;
     
-    btnPdf.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+    btnPdf.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando Informe...';
     btnPdf.disabled = true;
 
     try {
         const { jsPDF } = window.jspdf;
-        const canvas = await html2canvas(elemento, { 
-            scale: 2, 
-            backgroundColor: "#1a6b35" // color var(--verde-claro) para coincidir
-        });
-        
-        const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        let y = 20;
+
+        // --- 1. LÓGICA DE ANÁLISIS ---
+        let total = window.datosFiltrados.length;
+        let q1Si = 0;
+        let sumasPorPregunta = {};
+        let conteoRecursos = {};
+
+        // Inicializar objetos
+        for(let i=2; i<=19; i++) sumasPorPregunta[`q${i}`] = 0;
+
+        // Recorrer datos y sumar
+        window.datosFiltrados.forEach(d => {
+            if(d.respuestas?.q1 === "Sí") q1Si++;
+            
+            for(let i=2; i<=19; i++){
+                let val = d.respuestas?.[`q${i}`];
+                let num = val==="Nunca"?1 : val==="Algunas veces"?2 : val==="Casi siempre"?3 : val==="Siempre"?4 : 0;
+                sumasPorPregunta[`q${i}`] += num;
+            }
+
+            if(d.recursos) {
+                d.recursos.forEach(r => {
+                    conteoRecursos[r] = (conteoRecursos[r] || 0) + 1;
+                });
+            }
+        });
+
+        // Cálculos Finales
+        let q1Porcentaje = ((q1Si / total) * 100).toFixed(1);
+        let promediosPreguntas = [];
         
-        const pdfWidth = pdf.internal.pageSize.getWidth() - 20;
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        for(let i=2; i<=19; i++) {
+            promediosPreguntas.push({
+                num: i,
+                texto: window.listaPreguntas[i-2],
+                promedio: total > 0 ? (sumasPorPregunta[`q${i}`] / total) : 0
+            });
+        }
         
+        // Ordenar para sacar fortalezas y debilidades
+        promediosPreguntas.sort((a, b) => b.promedio - a.promedio);
+        let fortalezas = promediosPreguntas.slice(0, 2); // Las 2 mejores
+        let mejoras = promediosPreguntas.slice(-2).reverse(); // Las 2 peores
+        
+        let recursosOrdenados = Object.entries(conteoRecursos).sort((a,b) => b[1] - a[1]);
+
+        // --- 2. DIBUJAR EN EL PDF ---
+        
+        // Título Principal
         pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(16);
-        pdf.text("Informe Estadístico de Encuestas - I.E.T. San José", 10, 15);
+        pdf.setFontSize(18);
+        pdf.setTextColor(15, 61, 30); // Verde oscuro
+        pdf.text("INFORME DE EVALUACIÓN DOCENTE", pageWidth/2, y, {align: "center"});
+        y += 8;
+
+        // Subtítulos y Filtros
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(11);
+        pdf.setTextColor(50, 50, 50);
+        const grado = document.getElementById("filtroGrado").value || 'Todos los grados';
+        const asig = document.getElementById("filtroAsignatura").value || 'Todas las asignaturas';
+        
+        pdf.text(`Institución Educativa Técnica San José`, pageWidth/2, y, {align: "center"});
+        y += 6;
+        pdf.text(`Filtro aplicado: ${grado} | ${asig}`, pageWidth/2, y, {align: "center"});
+        y += 15;
+
+        // SECCIÓN 1: Cuantitativo
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(14);
+        pdf.setTextColor(0, 0, 0);
+        pdf.text("1. Resumen Cuantitativo", 15, y);
+        y += 8;
         
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(11);
-        const grado = document.getElementById("filtroGrado").value || 'Todos';
-        const asig = document.getElementById("filtroAsignatura").value || 'Todas';
-        pdf.text(`Filtro aplicado -> Grado: ${grado} | Asignatura: ${asig}`, 10, 23);
+        pdf.text(`• Total de encuestas analizadas: ${total}`, 15, y); y += 6;
+        pdf.text(`• Promedio General (Escala 1 a 4): ${document.getElementById("promedioGeneral").innerText}`, 15, y); y += 6;
+        pdf.text(`• El ${q1Porcentaje}% de los estudiantes afirma que se entregó el programa al inicio.`, 15, y); y += 12;
+
+        // SECCIÓN 2: Cualitativo (Fortalezas y Mejoras)
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(14);
+        pdf.text("2. Análisis Descriptivo", 15, y);
+        y += 8;
+
+        // Fortalezas
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(11);
+        pdf.setTextColor(26, 107, 53); // Verde
+        pdf.text("Principales Fortalezas (Mejores promedios):", 15, y);
+        y += 6;
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(50, 50, 50);
+        fortalezas.forEach(f => {
+            let texto = `• P${f.num}: ${f.texto} (Promedio: ${f.promedio.toFixed(2)})`;
+            let lineas = pdf.splitTextToSize(texto, pageWidth - 30);
+            pdf.text(lineas, 15, y);
+            y += lineas.length * 5;
+        });
+        y += 4;
+
+        // Áreas de mejora
+        pdf.setFont("helvetica", "bold");
+        pdf.setTextColor(200, 50, 50); // Rojo
+        pdf.text("Oportunidades de Mejora (Promedios más bajos):", 15, y);
+        y += 6;
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(50, 50, 50);
+        mejoras.forEach(m => {
+            let texto = `• P${m.num}: ${m.texto} (Promedio: ${m.promedio.toFixed(2)})`;
+            let lineas = pdf.splitTextToSize(texto, pageWidth - 30);
+            pdf.text(lineas, 15, y);
+            y += lineas.length * 5;
+        });
+        y += 4;
+
+        // Recursos
+        pdf.setFont("helvetica", "bold");
+        pdf.setTextColor(0, 0, 0);
+        pdf.text("Recursos Didácticos más utilizados:", 15, y);
+        y += 6;
+        pdf.setFont("helvetica", "normal");
+        if(recursosOrdenados.length > 0) {
+            // Mostrar los top 3 recursos
+            recursosOrdenados.slice(0, 3).forEach(r => {
+                pdf.text(`• ${r[0]} (${r[1]} menciones)`, 15, y);
+                y += 6;
+            });
+        } else {
+            pdf.text("• No se registraron recursos en estas encuestas.", 15, y);
+            y += 6;
+        }
+        y += 10;
+
+        // SECCIÓN 3: Gráfica
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(14);
+        pdf.text("3. Gráfico de Frecuencia de Respuestas", 15, y);
+        y += 5;
+
+        // Capturar Canvas
+        const elemento = document.getElementById("graficoGeneral");
+        const canvas = await html2canvas(elemento, { 
+            scale: 2, 
+            backgroundColor: "#1a6b35" // Mantenemos el fondo verde para que las letras blancas resalten
+        });
+        const imgData = canvas.toDataURL('image/png');
         
-        pdf.addImage(imgData, 'PNG', 10, 32, pdfWidth, pdfHeight);
-        pdf.save("Reporte_Grafico_SJ.pdf");
+        const imgWidth = pageWidth - 30;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // Validar si la gráfica cabe en la página, si no, crear nueva página
+        if (y + imgHeight > pdf.internal.pageSize.getHeight() - 15) {
+            pdf.addPage();
+            y = 20;
+        }
+
+        pdf.addImage(imgData, 'PNG', 15, y, imgWidth, imgHeight);
+
+        // Guardar
+        let nombreArchivo = `Informe_Evaluacion_${grado}_${asig}.pdf`.replace(/ /g, "_");
+        pdf.save(nombreArchivo);
         
     } catch(err) {
         console.error("Error al exportar PDF: ", err);
