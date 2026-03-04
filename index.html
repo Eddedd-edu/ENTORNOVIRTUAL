@@ -33,7 +33,15 @@
 }
 
 body {
-    background: linear-gradient(135deg, var(--verde), var(--verde-oscuro));
+    background-color: var(--verde-oscuro);
+    background-image: 
+        /* Gradiente principal superpuesto para no perder legibilidad */
+        linear-gradient(135deg, rgba(15, 61, 30, 0.9) 0%, rgba(7, 30, 16, 0.95) 100%),
+        /* Líneas diagonales amarillas sutiles */
+        repeating-linear-gradient(45deg, transparent, transparent 30px, rgba(242, 183, 5, 0.15) 30px, rgba(242, 183, 5, 0.15) 32px),
+        /* Líneas diagonales verde claro cruzadas */
+        repeating-linear-gradient(-45deg, transparent, transparent 50px, rgba(26, 107, 53, 0.25) 50px, rgba(26, 107, 53, 0.25) 53px);
+    background-attachment: fixed;
     color: var(--blanco);
     min-height: 100vh;
     display: flex;
