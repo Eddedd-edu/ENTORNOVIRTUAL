@@ -373,38 +373,40 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
         "Tratan temas importantes para la comunidad"
     ];
 
-    // Datos por defecto (Se sobrescribirán si el Excel de GitHub carga correctamente)
-    window.estudiantesData = [{"First Name": "YULI MARIANA", "Last Name": "LLANO VANEGAS", "ZipGrade ID": 112142026, "Access Code": "XF9cDMw", "Classes": "QUÍMICA 11-2"}, {"First Name": "ALEJANDRA", "Last Name": "MORENO ESCOBAR", "ZipGrade ID": 112182026, "Access Code": "DqQUdxq", "Classes": "QUÍMICA 11-2"}, {"First Name": "VALERIA", "Last Name": "MARIN OLAYA", "ZipGrade ID": 111142026, "Access Code": "Kpm7Cie", "Classes": "Química 11-1"}]; // Lista acortada como fallback
+    // Datos por defecto mientras se descarga
+    window.estudiantesData = [];
 
-    // ======= NUEVA FUNCIÓN PARA LEER DESDE GITHUB =======
-    // Reemplaza esta URL por el enlace "Raw" de tu archivo en GitHub
-    // Ejemplo: "https://raw.githubusercontent.com/TU_USUARIO/TU_REPOSITORIO/main/students-6.xlsx"
-    // Si usaste CSV en lugar de XLSX, también puedes poner el CSV, pero el código de abajo lee Excel.
-    const URL_EXCEL_GITHUB = "https://raw.githubusercontent.com/Usuario/Repositorio/main/students-6.xlsx"; 
+    // =========================================================================
+    // ENLACE GITHUB RAW CONFIGURADO
+    // =========================================================================
+    const URL_ARCHIVO_GITHUB = "https://raw.githubusercontent.com/Eddedd-edu/ENTORNOVIRTUAL/main/students-6.xlsx"; 
 
     async function cargarEstudiantesDesdeGitHub() {
         try {
-            const respuesta = await fetch(URL_EXCEL_GITHUB);
-            if (!respuesta.ok) throw new Error("No se pudo descargar el archivo");
+            const respuesta = await fetch(URL_ARCHIVO_GITHUB);
+            if (!respuesta.ok) throw new Error("Error HTTP al descargar: " + respuesta.status);
             
             const arrayBuffer = await respuesta.arrayBuffer();
+            // SheetJS detecta automáticamente si es CSV o XLSX
             const workbook = XLSX.read(arrayBuffer, { type: 'array' });
             const nombrePrimeraHoja = workbook.SheetNames[0];
             const hoja = workbook.Sheets[nombrePrimeraHoja];
             
-            // Convierte la hoja de Excel a un objeto JSON compatible con el sistema
+            // Convierte la hoja a JSON
             const datosConvertidos = XLSX.utils.sheet_to_json(hoja);
             
-            if(datosConvertidos.length > 0) {
+            if(datosConvertidos && datosConvertidos.length > 0) {
                 window.estudiantesData = datosConvertidos;
-                console.log("¡Datos de estudiantes cargados exitosamente desde GitHub!");
+                console.log("✅ ¡Datos de estudiantes cargados exitosamente desde GitHub! Total:", datosConvertidos.length);
+            } else {
+                console.warn("⚠️ El archivo se descargó, pero parece estar vacío.");
             }
         } catch (error) {
-            console.warn("No se pudo cargar el Excel desde GitHub. Se usarán los datos por defecto.", error);
+            console.error("❌ Error al cargar los datos desde GitHub:", error);
         }
     }
 
-    // Intentamos cargar el archivo apenas inicie la página
+    // Ejecutar la carga al iniciar
     cargarEstudiantesDesdeGitHub();
 </script>
 </head>
@@ -520,7 +522,7 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
         
         <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #1e90ff;">
             <h4 style="color: #1e90ff; margin-bottom: 10px;">1. ¿Olvidaste tu Código ZipGrade?</h4>
-            <input type="text" id="inputBuscarApellidos" placeholder="Escribe tus dos apellidos (Ej: PEREZ BEJARANO)">
+            <input type="text" id="inputBuscarApellidos" placeholder="Escribe tus apellidos (Ej: PEREZ BEJARANO)">
             <button onclick="buscarSoloZipGrade()" style="background: #1e90ff; color: white; width: 100%;"><i class="fas fa-search"></i> Buscar mi Código ZipGrade</button>
         </div>
 
@@ -1113,12 +1115,13 @@ function buscarSoloZipGrade() {
     const resultadosDiv = document.getElementById("resultadosCredenciales");
     
     if (!inputApellidos) {
-        resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa tus apellidos.</p>";
+        resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa tu apellido.</p>";
         return;
     }
     
+    // Mejorada la compatibilidad de búsqueda
     const filtrados = window.estudiantesData.filter(est => {
-        return est["Last Name"] && est["Last Name"].toLowerCase().includes(inputApellidos);
+        return est["Last Name"] && est["Last Name"].toString().toLowerCase().trim().includes(inputApellidos);
     });
     
     if (filtrados.length === 0) {
@@ -1153,8 +1156,8 @@ function buscarContrasena() {
     }
     
     const filtrados = window.estudiantesData.filter(est => {
-        const idCoincide = est["ZipGrade ID"] && est["ZipGrade ID"].toString() === inputZip;
-        const apellidoCoincide = est["Last Name"] && est["Last Name"].toLowerCase().includes(inputApellido);
+        const idCoincide = est["ZipGrade ID"] && est["ZipGrade ID"].toString().trim() === inputZip;
+        const apellidoCoincide = est["Last Name"] && est["Last Name"].toString().toLowerCase().trim().includes(inputApellido);
         return idCoincide && apellidoCoincide;
     });
     
