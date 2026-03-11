@@ -92,6 +92,7 @@ header p {
     cursor: pointer;
     transition: var(--transition);
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative; /* Para posicionar la notificación */
 }
 
 .menu-card:hover {
@@ -121,6 +122,26 @@ header p {
 .menu-card p {
     font-size: 0.9rem;
     opacity: 0.7;
+}
+
+/* Animación de Alerta / Notificación */
+@keyframes pulseAlert {
+    0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+    70% { box-shadow: 0 0 0 12px rgba(255, 71, 87, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+}
+
+.has-alert::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 16px;
+    height: 16px;
+    background-color: #ff4757;
+    border-radius: 50%;
+    border: 2px solid var(--verde-oscuro);
+    animation: pulseAlert 1.5s infinite;
 }
 
 /* Modales */
@@ -437,7 +458,7 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
         <p>Simulaciones y herramientas</p>
     </div>
 
-    <div class="menu-card" onclick="abrirAnuncios()">
+    <div class="menu-card has-alert" id="cardAnuncios" onclick="abrirAnuncios()">
         <i class="fas fa-bullhorn"></i>
         <h3>Tablero de Anuncios</h3>
         <p>Novedades y recordatorios</p>
@@ -473,6 +494,14 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
         <p class="small-note">Mantente al día con las últimas noticias de la clase.</p>
         
         <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
+            
+            <div style="background: rgba(0,0,0,0.2); border-left: 4px solid #2ed573; padding: 15px; border-radius: 8px;">
+                <h4 style="color: #2ed573; margin-bottom: 5px;">¡Nuevo Laboratorio: CarbonoQuest PRO!</h4>
+                <p style="font-size: 0.95rem; margin-bottom: 5px;">Ya puedes acceder al entorno virtual de Química Orgánica. Explora las propiedades del átomo de carbono, tipos de fórmulas y supera el reto de síntesis.</p>
+                <a href="https://eddedd-edu.github.io/Carbonquest/" target="_blank" style="display:inline-block; margin-top:8px; padding:8px 15px; background:#2ed573; color:#000; text-decoration:none; border-radius:8px; font-weight:bold; font-size:0.9rem;"><i class="fas fa-flask"></i> Ingresar al Laboratorio</a><br>
+                <span style="font-size: 0.8rem; opacity: 0.6; margin-top:10px; display:inline-block;"><i class="far fa-star"></i> ¡Nuevo Recurso!</span>
+            </div>
+
             <div style="background: rgba(0,0,0,0.2); border-left: 4px solid var(--amarillo); padding: 15px; border-radius: 8px;">
                 <h4 style="color: var(--amarillo); margin-bottom: 5px;">¡Bienvenidos al Entorno Virtual!</h4>
                 <p style="font-size: 0.95rem; margin-bottom: 5px;">Ya pueden consultar sus contraseñas en la sección "Consultar Credenciales". Recuerden que necesitarán su Código ZipGrade y su Apellido para ingresar.</p>
@@ -490,11 +519,12 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
                 <p style="font-size: 0.95rem; margin-bottom: 5px;">Ya está disponible el nuevo laboratorio virtual interactivo sobre <strong>Enlaces Químicos</strong>. Ingresa a la sección de Laboratorios para explorarlo.</p>
                 <span style="font-size: 0.8rem; opacity: 0.6;"><i class="far fa-star"></i> Novedad</span>
             </div> 
+            
             <div style="background: rgba(0,0,0,0.2); border-left: 4px solid #f2b705; padding: 15px; border-radius: 8px;">
-    <h4 style="color: #f2b705; margin-bottom: 5px;">¡Nueva Tabla Periódica Interactiva!</h4>
-    <p style="font-size: 0.95rem; margin-bottom: 5px;">Ya puedes explorar los elementos químicos en nuestro nuevo <strong>Laboratorio Virtual</strong>. ¡Pruébalo ahora!</p>
-    <span style="font-size: 0.8rem; opacity: 0.6;"><i class="far fa-star"></i> ¡Nuevo Recurso!</span>
-        </div>
+                <h4 style="color: #f2b705; margin-bottom: 5px;">¡Nueva Tabla Periódica Interactiva!</h4>
+                <p style="font-size: 0.95rem; margin-bottom: 5px;">Ya puedes explorar los elementos químicos en nuestro nuevo <strong>Laboratorio Virtual</strong>. ¡Pruébalo ahora!</p>
+                <span style="font-size: 0.8rem; opacity: 0.6;"><i class="far fa-star"></i> Novedad</span>
+            </div>
         </div>
     </div>
 </div>
@@ -568,6 +598,12 @@ footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; t
             <div class="menu-card" style="padding: 20px;" onclick="window.open('https://eddedd-edu.github.io/Lab-Enlaces/')">
                 <i class="fas fa-project-diagram"></i>
                 <h3>Laboratorio de Enlaces</h3>
+            </div>
+            
+            <div class="menu-card" style="padding: 20px; border-color: #2ed573;" onclick="window.open('https://eddedd-edu.github.io/Carbonquest/')">
+                <i class="fas fa-flask" style="color: #2ed573;"></i>
+                <h3 style="color: #2ed573;">CarbonoQuest PRO</h3>
+                <p>Química Orgánica</p>
             </div>
         </div>
     </div>
@@ -1116,7 +1152,15 @@ function cerrarCredenciales(){
 }
 
 /* Helpers Anuncios */
-function abrirAnuncios(){ document.getElementById("modalAnuncios").style.display="flex"; }
+function abrirAnuncios(){ 
+    document.getElementById("modalAnuncios").style.display="flex";
+    
+    // Remueve la animación de alerta una vez el usuario ha hecho clic
+    const cardAnuncios = document.getElementById("cardAnuncios");
+    if(cardAnuncios) {
+        cardAnuncios.classList.remove("has-alert");
+    }
+}
 function cerrarAnuncios(){ document.getElementById("modalAnuncios").style.display="none"; }
 
 /* =========================================
