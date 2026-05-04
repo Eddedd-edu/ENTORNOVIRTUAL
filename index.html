@@ -1175,9 +1175,16 @@ function cerrarAnuncios(){ document.getElementById("modalAnuncios").style.displa
    NUEVAS FUNCIONES DE BÚSQUEDA 
 ========================================= */
 
+// Helper para quitar tildes y normalizar
+function normalizarTexto(texto) {
+    if (!texto) return '';
+    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
 // 1. Buscar únicamente el ZipGrade ID por Apellidos
 function buscarSoloZipGrade() {
-    const inputApellidos = document.getElementById("inputBuscarApellidos").value.toLowerCase().trim();
+    const inputRaw = document.getElementById("inputBuscarApellidos").value;
+    const inputApellidos = normalizarTexto(inputRaw);
     const resultadosDiv = document.getElementById("resultadosCredenciales");
     
     if (!inputApellidos) {
@@ -1185,9 +1192,11 @@ function buscarSoloZipGrade() {
         return;
     }
     
-    // Mejorada la compatibilidad de búsqueda
+    // Mejorada la compatibilidad de búsqueda omitiendo tildes
     const filtrados = window.estudiantesData.filter(est => {
-        return est["Last Name"] && est["Last Name"].toString().toLowerCase().trim().includes(inputApellidos);
+        if (!est["Last Name"]) return false;
+        const apellidoDB = normalizarTexto(est["Last Name"].toString());
+        return apellidoDB.includes(inputApellidos);
     });
     
     if (filtrados.length === 0) {
@@ -1213,7 +1222,8 @@ function buscarSoloZipGrade() {
 // 2. Buscar Contraseña (Requiere ZipGrade ID exacto y Apellido)
 function buscarContrasena() {
     const inputZip = document.getElementById("inputZipGrade").value.trim();
-    const inputApellido = document.getElementById("inputApellido").value.toLowerCase().trim();
+    const inputRawApellido = document.getElementById("inputApellido").value;
+    const inputApellido = normalizarTexto(inputRawApellido);
     const resultadosDiv = document.getElementById("resultadosCredenciales");
     
     if (!inputZip || !inputApellido) {
@@ -1223,7 +1233,10 @@ function buscarContrasena() {
     
     const filtrados = window.estudiantesData.filter(est => {
         const idCoincide = est["ZipGrade ID"] && est["ZipGrade ID"].toString().trim() === inputZip;
-        const apellidoCoincide = est["Last Name"] && est["Last Name"].toString().toLowerCase().trim().includes(inputApellido);
+        if (!est["Last Name"]) return false;
+        const apellidoDB = normalizarTexto(est["Last Name"].toString());
+        const apellidoCoincide = apellidoDB.includes(inputApellido);
+        
         return idCoincide && apellidoCoincide;
     });
     
