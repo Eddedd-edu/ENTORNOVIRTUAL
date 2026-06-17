@@ -1,1265 +1,2267 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Entorno Virtual Química I.E.T. San José</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<style>
-:root {
-    --verde: #0f3d1e;
-    --verde-claro: #1a6b35;
-    --verde-oscuro: #071e10;
-    --amarillo: #f2b705;
-    --amarillo-hover: #ffc926;
-    --blanco: #ffffff;
-    --gris-fondo: rgba(255, 255, 255, 0.05);
-    --borde: rgba(255, 255, 255, 0.15);
-    --transition: 0.3s ease;
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Poppins', sans-serif;
-}
-
-body {
-    background-color: var(--verde-oscuro);
-    background-image: 
-        /* Gradiente principal superpuesto para no perder legibilidad */
-        linear-gradient(135deg, rgba(15, 61, 30, 0.9) 0%, rgba(7, 30, 16, 0.95) 100%),
-        /* Líneas diagonales amarillas sutiles */
-        repeating-linear-gradient(45deg, transparent, transparent 30px, rgba(242, 183, 5, 0.15) 30px, rgba(242, 183, 5, 0.15) 32px),
-        /* Líneas diagonales verde claro cruzadas */
-        repeating-linear-gradient(-45deg, transparent, transparent 50px, rgba(26, 107, 53, 0.25) 50px, rgba(26, 107, 53, 0.25) 53px);
-    background-attachment: fixed;
-    color: var(--blanco);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
-}
-
-/* Header */
-header {
-    text-align: center;
-    margin-bottom: 40px;
-    animation: fadeInDown 0.8s ease;
-}
-header img {
-    width: 130px;
-    margin-bottom: 15px;
-    filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.3));
-}
-header h1 {
-    color: var(--amarillo);
-    font-weight: 700;
-    letter-spacing: 1px;
-    font-size: 2.2rem;
-}
-header p {
-    opacity: 0.85;
-    font-size: 1.1rem;
-    font-weight: 300;
-}
-
-/* Menú Grid */
-.menu-grid {
-    width: 100%;
-    max-width: 1000px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 25px;
-}
-
-.menu-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--borde);
-    padding: 35px 25px;
-    border-radius: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: var(--transition);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    position: relative; /* Para posicionar la notificación */
-}
-
-.menu-card:hover {
-    transform: translateY(-8px);
-    background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
-    border-color: rgba(242, 183, 5, 0.4);
-}
-
-.menu-card i {
-    font-size: 2.5rem;
-    color: var(--amarillo);
-    margin-bottom: 15px;
-    transition: transform 0.3s;
-}
-
-.menu-card:hover i {
-    transform: scale(1.1);
-}
-
-.menu-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-.menu-card p {
-    font-size: 0.9rem;
-    opacity: 0.7;
-}
-
-/* Animación de Alerta / Notificación */
-@keyframes pulseAlert {
-    0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
-    70% { box-shadow: 0 0 0 12px rgba(255, 71, 87, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
-}
-
-.has-alert::after {
-    content: '';
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    width: 16px;
-    height: 16px;
-    background-color: #ff4757;
-    border-radius: 50%;
-    border: 2px solid var(--verde-oscuro);
-    animation: pulseAlert 1.5s infinite;
-}
-
-/* Modales */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(5px);
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    z-index: 999;
-}
-
-.modal-content {
-    background: var(--verde-claro);
-    padding: 35px;
-    border-radius: 20px;
-    max-width: 900px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    color: var(--blanco);
-    position: relative;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    animation: zoomIn 0.3s ease-out;
-}
-
-/* Estilos de Botones */
-.close-btn {
-    position: absolute;
-    top: 20px;
-    right: 25px;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--blanco);
-    background: rgba(255,255,255,0.1);
-    width: 40px; height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    transition: var(--transition);
-}
-
-.close-btn:hover {
-    background: #ff4757;
-    color: white;
-    transform: rotate(90deg);
-}
-
-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    background: var(--amarillo);
-    color: #000;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-button:hover {
-    background: var(--amarillo-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(242, 183, 5, 0.3);
-}
-
-.btn-excel { background: #20c997; color: #000; }
-.btn-excel:hover { background: #1ba87e; box-shadow: 0 5px 15px rgba(32, 201, 151, 0.3); }
-.btn-pdf { background: #ff6b81; color: #fff; }
-.btn-pdf:hover { background: #ff4757; box-shadow: 0 5px 15px rgba(255, 107, 129, 0.3); }
-.btn-danger { background: rgba(255,255,255,0.1); color: #fff; }
-.btn-danger:hover { background: #ff4757; }
-
-/* Formularios */
-input[type="text"], input[type="email"], input[type="password"], input[type="date"], select, textarea {
-    padding: 12px 15px;
-    margin: 8px 0 15px 0;
-    width: 100%;
-    border-radius: 10px;
-    border: 1px solid var(--borde);
-    background: rgba(0, 0, 0, 0.2);
-    color: var(--blanco);
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-input:focus, select:focus {
-    outline: none;
-    border-color: var(--amarillo);
-    box-shadow: 0 0 0 3px rgba(242, 183, 5, 0.2);
-    background: rgba(0, 0, 0, 0.3);
-}
-
-.question {
-    background: rgba(0,0,0,0.15);
-    padding: 20px;
-    border-radius: 15px;
-    margin-bottom: 20px;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-
-.question h4 {
-    margin-bottom: 12px;
-    font-size: 1.05rem;
-    font-weight: 500;
-    color: var(--amarillo);
-}
-
-/* Radios y Checkboxes táctiles */
-.question label {
-    display: block;
-    padding: 10px 15px;
-    margin-bottom: 8px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.question label:hover {
-    background: rgba(255,255,255,0.1);
-}
-
-input[type="radio"], input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--amarillo);
-    cursor: pointer;
-    margin: 0;
-}
-
-h2 { margin-bottom: 15px; color: var(--amarillo); font-weight: 600; }
-h3 { margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid var(--borde); padding-bottom: 5px; }
-.small-note { font-size: 0.85rem; opacity: 0.7; margin-bottom: 20px; }
-
-/* Gráficos */
-.chart-container {
-    position: relative;
-    width: 100%;
-    height: 350px;
-    background: #fff;
-    border-radius: 15px;
-    padding: 15px;
-    margin-top: 20px;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
-}
-
-/* Área Imprimir PDF */
-#areaImprimir {
-    padding: 20px;
-    background: var(--verde-claro);
-    border-radius: 15px;
-    border: 1px solid rgba(255,255,255,0.1);
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.stat-box {
-    background: rgba(0,0,0,0.2);
-    padding: 15px;
-    border-radius: 10px;
-    text-align: center;
-}
-.stat-box h3 { margin: 0; border: none; font-size: 1rem; color: #ddd; }
-.stat-box span { font-size: 1.8rem; font-weight: 700; color: var(--amarillo); }
-
-.filter-bar {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    align-items: center;
-    background: rgba(0,0,0,0.2);
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-}
-
-.filter-bar select {
-    width: auto;
-    min-width: 120px;
-    margin: 0;
-}
-
-footer { margin-top: auto; padding-top: 30px; opacity: 0.6; font-size: 0.9rem; text-align: center; width: 100%;}
-
-/* Animaciones */
-@keyframes zoomIn {
-    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
-}
-@keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Scrollbar personalizada */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--amarillo); }
-
-/* Responsive */
-@media (max-width: 768px) {
-    header h1 { font-size: 1.8rem; }
-    .menu-grid { grid-template-columns: 1fr; }
-    .modal-content { padding: 25px 20px; }
-    .filter-bar { flex-direction: column; align-items: stretch; }
-    .filter-bar select, .filter-bar button { width: 100%; }
-    .chart-container { height: 280px; }
-    .stats-grid { grid-template-columns: 1fr 1fr; }
-}
-</style>
-
-<script>
-    window.listaPreguntas = [
-        "Presenta los temas con mucha claridad",
-        "Comunica claramente los objetivos de cada clase",
-        "Responde las dudas de los estudiantes en clase",
-        "Expresa expectativas positivas de los estudiantes",
-        "Explica los criterios de evaluación de la materia",
-        "Evalúa adecuadamente la materia",
-        "Programa y coordina salidas pedagógicas",
-        "Atiende dudas académicas fuera de clase",
-        "Realiza actividades de recuperación y refuerzo",
-        "Indica normas de comportamiento claras",
-        "Es respetado por todos los estudiantes",
-        "Realiza clases activas y dinámicas",
-        "Informa a padres sobre el desempeño",
-        "Sus orientaciones son seguidas por todos",
-        "Las clases son interesantes y llamativas",
-        "Empiezan y terminan a la hora indicada",
-        "Desarrollan los temas en el tiempo indicado",
-        "Tratan temas importantes para la comunidad"
-    ];
-
-    // Datos por defecto mientras se descarga
-    window.estudiantesData = [];
-
-    // =========================================================================
-    // ENLACE GITHUB RAW CONFIGURADO
-    // =========================================================================
-    const URL_ARCHIVO_GITHUB = "https://raw.githubusercontent.com/Eddedd-edu/ENTORNOVIRTUAL/main/students-6.xlsx"; 
-
-    async function cargarEstudiantesDesdeGitHub() {
-        try {
-            const respuesta = await fetch(URL_ARCHIVO_GITHUB);
-            if (!respuesta.ok) throw new Error("Error HTTP al descargar: " + respuesta.status);
-            
-            const arrayBuffer = await respuesta.arrayBuffer();
-            // SheetJS detecta automáticamente si es CSV o XLSX
-            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-            const nombrePrimeraHoja = workbook.SheetNames[0];
-            const hoja = workbook.Sheets[nombrePrimeraHoja];
-            
-            // Convierte la hoja a JSON
-            const datosConvertidos = XLSX.utils.sheet_to_json(hoja);
-            
-            if(datosConvertidos && datosConvertidos.length > 0) {
-                window.estudiantesData = datosConvertidos;
-                console.log("✅ ¡Datos de estudiantes cargados exitosamente desde GitHub! Total:", datosConvertidos.length);
-            } else {
-                console.warn("⚠️ El archivo se descargó, pero parece estar vacío.");
-            }
-        } catch (error) {
-            console.error("❌ Error al cargar los datos desde GitHub:", error);
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Entorno Virtual Química I.E.T. San José</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+    </script>
+    <style>
+        :root {
+            --verde: #0f3d1e;
+            --verde-claro: #1a6b35;
+            --verde-oscuro: #071e10;
+            --amarillo: #f2b705;
+            --amarillo-hover: #ffc926;
+            --blanco: #ffffff;
+            --gris-fondo: rgba(255, 255, 255, 0.05);
+            --borde: rgba(255, 255, 255, 0.15);
+            --transition: 0.3s ease;
         }
-    }
 
-    // Ejecutar la carga al iniciar
-    cargarEstudiantesDesdeGitHub();
-</script>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--verde-oscuro);
+            background-image: linear-gradient(135deg, rgba(15, 61, 30, 0.9) 0%, rgba(7, 30, 16, 0.95) 100%),
+                repeating-linear-gradient(45deg, transparent, transparent 30px, rgba(242, 183, 5, 0.15) 30px, rgba(242, 183, 5, 0.15) 32px),
+                repeating-linear-gradient(-45deg, transparent, transparent 50px, rgba(26, 107, 53, 0.25) 50px, rgba(26, 107, 53, 0.25) 53px);
+            background-attachment: fixed;
+            color: var(--blanco);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+        header img {
+            width: 130px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.3));
+        }
+        header h1 {
+            color: var(--amarillo);
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-size: 2.2rem;
+        }
+        header p {
+            opacity: 0.85;
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .menu-grid {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+        }
+
+        .menu-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--borde);
+            padding: 35px 25px;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .menu-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(242, 183, 5, 0.4);
+        }
+        .menu-card i {
+            font-size: 2.5rem;
+            color: var(--amarillo);
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+        }
+        .menu-card:hover i {
+            transform: scale(1.1);
+        }
+        .menu-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .menu-card p {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        @keyframes pulseAlert {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 12px rgba(255, 71, 87, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
+            }
+        }
+        .has-alert::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 16px;
+            height: 16px;
+            background-color: #ff4757;
+            border-radius: 50%;
+            border: 2px solid var(--verde-oscuro);
+            animation: pulseAlert 1.5s infinite;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            z-index: 999;
+        }
+        .modal-content {
+            background: var(--verde-claro);
+            padding: 35px;
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            color: var(--blanco);
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.3s ease-out;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--blanco);
+            background: rgba(255, 255, 255, 0.1);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            transition: var(--transition);
+            z-index: 10;
+        }
+        .close-btn:hover {
+            background: #ff4757;
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: var(--amarillo);
+            color: #000;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        button:hover {
+            background: var(--amarillo-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(242, 183, 5, 0.3);
+        }
+
+        .btn-excel {
+            background: #20c997;
+            color: #000;
+        }
+        .btn-excel:hover {
+            background: #1ba87e;
+            box-shadow: 0 5px 15px rgba(32, 201, 151, 0.3);
+        }
+        .btn-pdf {
+            background: #ff6b81;
+            color: #fff;
+        }
+        .btn-pdf:hover {
+            background: #ff4757;
+            box-shadow: 0 5px 15px rgba(255, 107, 129, 0.3);
+        }
+        .btn-danger {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #ff4757;
+        }
+        .btn-admin {
+            background: #7c3aed;
+            color: #fff;
+        }
+        .btn-admin:hover {
+            background: #6d28d9;
+            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.3);
+        }
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+        .btn-xs {
+            padding: 4px 10px;
+            font-size: 0.78rem;
+            border-radius: 6px;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+            box-shadow: none;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"],
+        input[type="url"],
+        select,
+        textarea {
+            padding: 12px 15px;
+            margin: 8px 0 15px 0;
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid var(--borde);
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--blanco);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--amarillo);
+            box-shadow: 0 0 0 3px rgba(242, 183, 5, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .question {
+            background: rgba(0, 0, 0, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .question h4 {
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--amarillo);
+        }
+        .question label {
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .question label:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        input[type="radio"],
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--amarillo);
+            cursor: pointer;
+            margin: 0;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: var(--amarillo);
+            font-weight: 600;
+        }
+        h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--borde);
+            padding-bottom: 5px;
+        }
+        .small-note {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            background: #fff;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #areaImprimir {
+            padding: 20px;
+            background: var(--verde-claro);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-box h3 {
+            margin: 0;
+            border: none;
+            font-size: 1rem;
+            color: #ddd;
+        }
+        .stat-box span {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--amarillo);
+        }
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .filter-bar select {
+            width: auto;
+            min-width: 120px;
+            margin: 0;
+        }
+
+        /* === ESTILOS ADMIN === */
+        .admin-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--borde);
+            padding-bottom: 15px;
+        }
+        .admin-tab {
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid transparent;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+        .admin-tab.active {
+            background: var(--amarillo);
+            color: #000;
+            font-weight: 600;
+            border-color: var(--amarillo);
+        }
+        .admin-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+        .admin-tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .admin-tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: var(--transition);
+            flex-wrap: wrap;
+        }
+        .btn-list-item:hover {
+            background: rgba(0, 0, 0, 0.35);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .btn-list-item .btn-icon-preview {
+            font-size: 1.6rem;
+            color: var(--amarillo);
+            min-width: 40px;
+            text-align: center;
+        }
+        .btn-list-item .btn-info {
+            flex: 1;
+            min-width: 150px;
+        }
+        .btn-list-item .btn-info strong {
+            display: block;
+            font-size: 0.95rem;
+        }
+        .btn-list-item .btn-info small {
+            opacity: 0.6;
+            font-size: 0.8rem;
+        }
+        .btn-list-item .btn-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-modal {
+            background: #7c3aed;
+            color: #fff;
+        }
+        .badge-link {
+            background: #1e90ff;
+            color: #fff;
+        }
+        .badge-alert {
+            background: #ff4757;
+            color: #fff;
+        }
+
+        .preview-mini {
+            background: var(--verde-oscuro);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .preview-mini .mini-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 0.7rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .preview-mini .mini-card i {
+            font-size: 1.2rem;
+            color: var(--amarillo);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .preview-mini .mini-card strong {
+            display: block;
+            font-size: 0.7rem;
+            line-height: 1.2;
+        }
+
+        .color-picker-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .color-picker-row label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        .color-picker-row input[type="color"] {
+            width: 50px;
+            height: 36px;
+            padding: 2px;
+            border-radius: 8px;
+            border: 2px solid var(--borde);
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2ed573;
+            color: #000;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            z-index: 9999;
+            animation: slideUp 0.4s ease, fadeOutToast 0.4s ease 2s forwards;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        @keyframes fadeOutToast {
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+        }
+
+        footer {
+            margin-top: auto;
+            padding-top: 30px;
+            opacity: 0.6;
+            font-size: 0.9rem;
+            text-align: center;
+            width: 100%;
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--amarillo);
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-content {
+                padding: 25px 20px;
+            }
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-bar select,
+            .filter-bar button {
+                width: 100%;
+            }
+            .chart-container {
+                height: 280px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .btn-list-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn-list-item .btn-actions {
+                justify-content: flex-end;
+            }
+            .preview-mini {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
+        }
+    </style>
+    <script>
+        window.listaPreguntas = [
+            "Presenta los temas con mucha claridad",
+            "Comunica claramente los objetivos de cada clase",
+            "Responde las dudas de los estudiantes en clase",
+            "Expresa expectativas positivas de los estudiantes",
+            "Explica los criterios de evaluación de la materia",
+            "Evalúa adecuadamente la materia",
+            "Programa y coordina salidas pedagógicas",
+            "Atiende dudas académicas fuera de clase",
+            "Realiza actividades de recuperación y refuerzo",
+            "Indica normas de comportamiento claras",
+            "Es respetado por todos los estudiantes",
+            "Realiza clases activas y dinámicas",
+            "Informa a padres sobre el desempeño",
+            "Sus orientaciones son seguidas por todos",
+            "Las clases son interesantes y llamativas",
+            "Empiezan y terminan a la hora indicada",
+            "Desarrollan los temas en el tiempo indicado",
+            "Tratan temas importantes para la comunidad"
+        ];
+        window.estudiantesData = [];
+        const URL_ARCHIVO_GITHUB =
+            "https://raw.githubusercontent.com/Eddedd-edu/ENTORNOVIRTUAL/main/students-6.xlsx";
+
+        async function cargarEstudiantesDesdeGitHub() {
+            try {
+                const respuesta = await fetch(URL_ARCHIVO_GITHUB);
+                if (!respuesta.ok) throw new Error("Error HTTP al descargar: " + respuesta.status);
+                const arrayBuffer = await respuesta.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const nombrePrimeraHoja = workbook.SheetNames[0];
+                const hoja = workbook.Sheets[nombrePrimeraHoja];
+                const datosConvertidos = XLSX.utils.sheet_to_json(hoja);
+                if (datosConvertidos && datosConvertidos.length > 0) {
+                    window.estudiantesData = datosConvertidos;
+                    console.log("✅ ¡Datos de estudiantes cargados exitosamente desde GitHub! Total:", datosConvertidos
+                        .length);
+                } else {
+                    console.warn("⚠️ El archivo se descargó, pero parece estar vacío.");
+                }
+            } catch (error) {
+                console.error("❌ Error al cargar los datos desde GitHub:", error);
+            }
+        }
+        cargarEstudiantesDesdeGitHub();
+    </script>
 </head>
 <body>
 
-<header>
-<img src="logo.png" alt="Escudo IET San José" onerror="this.style.display='none'">
-<h1>ENTORNO VIRTUAL SJ</h1>
-<p>I.E.T. San José - Fresno Tolima</p>
-</header>
+    <header>
+        <img src="logo.png" alt="Escudo IET San José" id="headerLogo" onerror="this.style.display='none'">
+        <h1 id="headerTitulo">ENTORNO VIRTUAL SJ</h1>
+        <p id="headerSubtitulo">I.E.T. San José - Fresno Tolima</p>
+    </header>
 
-<div class="menu-grid">
-    <div class="menu-card" onclick="abrirLabs()">
-        <i class="fas fa-flask"></i>
-        <h3>Laboratorio Virtual SJ</h3>
-        <p>Haz click para elegir laboratorio</p>
-    </div>
-    
-    <div class="menu-card" onclick="window.open('https://sedtolimaedu-my.sharepoint.com/:f:/g/personal/edison_avendano_sedtolima_edu_co/IgDYigqdoVH1TZ2j4l1sqdAAAaDbR27cLJJhdXkSb4yQRKY?e=1c3Fdl', '_blank')">
-        <i class="fas fa-folder-open"></i>
-        <h3>Material de Apoyo</h3>
-        <p>Guías, talleres y documentos</p>
-    </div>
+    <!-- MENÚ DINÁMICO (se renderiza desde configuración) -->
+    <div class="menu-grid" id="menuGrid"></div>
 
-    <div class="menu-card" onclick="abrirRecursosExternos()">
-        <i class="fas fa-globe"></i>
-        <h3>Recursos Externos</h3>
-        <p>Simulaciones y herramientas</p>
-    </div>
-
-    <div class="menu-card has-alert" id="cardAnuncios" onclick="abrirAnuncios()">
-        <i class="fas fa-bullhorn"></i>
-        <h3>Tablero de Anuncios</h3>
-        <p>Novedades y recordatorios</p>
-    </div>
-    
-    <div class="menu-card" onclick="abrirCredenciales()">
-        <i class="fas fa-id-card"></i>
-        <h3>Consultar Credenciales</h3>
-        <p>Busca tu código y contraseña</p>
-    </div>
-
-    <!-- NUEVO ENLACE AGREGADO: Quizzes -->
-    <div class="menu-card" onclick="window.open('https://eddedd-edu.github.io/quizzes/#', '_blank')">
-        <i class="fas fa-tasks"></i>
-        <h3>Quizzes</h3>
-        <p>Plataforma de pruebas</p>
-    </div>
-
-    <div class="menu-card" onclick="window.open('https://www.zipgrade.com/s/')">
-        <i class="fas fa-check-circle"></i>
-        <h3>Evaluación Docente</h3>
-        <p>ZipGrade</p>
-    </div>
-    <div class="menu-card" onclick="abrirEncuesta()">
-        <i class="fas fa-clipboard-list"></i>
-        <h3>Encuesta Estudiantes</h3>
-        <p>Evaluación anual (MEN)</p>
-    </div>
-    <div class="menu-card" onclick="abrirLogin()">
-        <i class="fas fa-chart-pie"></i>
-        <h3>Panel Estadístico</h3>
-        <p>Acceso restringido</p>
-    </div>
-</div>
-
-<div class="modal" id="modalAnuncios">
-    <div class="modal-content" style="max-width: 600px;">
-        <div class="close-btn" onclick="cerrarAnuncios()"><i class="fas fa-times"></i></div>
-        <h2><i class="fas fa-bullhorn"></i> Anuncios y Novedades</h2>
-        <p class="small-note">Mantente al día con las últimas noticias de la clase.</p>
-        
-        <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
-            
-            <div style="background: rgba(0,0,0,0.2); border-left: 4px solid #2ed573; padding: 15px; border-radius: 8px;">
-                <h4 style="color: #2ed573; margin-bottom: 5px;">¡Nuevo Laboratorio: CarbonoQuest PRO!</h4>
-                <p style="font-size: 0.95rem; margin-bottom: 5px;">Ya puedes acceder al entorno virtual de Química Orgánica. Explora las propiedades del átomo de carbono, tipos de fórmulas y supera el reto de síntesis.</p>
-                <a href="https://eddedd-edu.github.io/Carbonquest/" target="_blank" style="display:inline-block; margin-top:8px; padding:8px 15px; background:#2ed573; color:#000; text-decoration:none; border-radius:8px; font-weight:bold; font-size:0.9rem;"><i class="fas fa-flask"></i> Ingresar al Laboratorio</a><br>
-                <span style="font-size: 0.8rem; opacity: 0.6; margin-top:10px; display:inline-block;"><i class="far fa-star"></i> ¡Nuevo Recurso!</span>
-            </div>
-
-            <div style="background: rgba(0,0,0,0.2); border-left: 4px solid var(--amarillo); padding: 15px; border-radius: 8px;">
-                <h4 style="color: var(--amarillo); margin-bottom: 5px;">¡Bienvenidos al Entorno Virtual!</h4>
-                <p style="font-size: 0.95rem; margin-bottom: 5px;">Ya pueden consultar sus contraseñas en la sección "Consultar Credenciales". Recuerden que necesitarán su Código ZipGrade y su Apellido para ingresar.</p>
-                <span style="font-size: 0.8rem; opacity: 0.6;"><i class="far fa-calendar-alt"></i> Publicado recientemente</span>
-            </div>
-            
-            <div style="background: rgba(0,0,0,0.2); border-left: 4px solid #20c997; padding: 15px; border-radius: 8px;">
-                <h4 style="color: #20c997; margin-bottom: 5px;">Nuevo Material Disponible</h4>
-                <p style="font-size: 0.95rem; margin-bottom: 5px;">Se ha subido la guía de estudio para esta semana en la carpeta de <strong>Material de Apoyo</strong>. Por favor, revísenla antes de la próxima clase.</p>
-                <span style="font-size: 0.8rem; opacity: 0.6;"><i class="far fa-calendar-alt"></i> Recordatorio</span>
-            </div>
-
-            <div style="background: rgba(0,0,0,0.2); border-left: 4px solid #ff4757; padding: 15px; border-radius: 8px;">
-                <h4 style="color: #ff4757; margin-bottom: 5px;">¡Nuevo Desafío: ScapeRoom!</h4>
-                <p style="font-size: 0.95rem; margin-bottom: 5px;">Pon a prueba tus conocimientos químicos para lograr escapar de nuestro laboratorio secreto. ¿Aceptas el reto?</p>
-                <a href="https://eddedd-edu.github.io/scapeRoom/" target="_blank" style="display:inline-block; margin-top:8px; padding:8px 15px; background:#ff4757; color:#fff; text-decoration:none; border-radius:8px; font-weight:bold; font-size:0.9rem;"><i class="fas fa-door-open"></i> Entrar al ScapeRoom</a><br>
-                <span style="font-size: 0.8rem; opacity: 0.6; margin-top:10px; display:inline-block;"><i class="far fa-star"></i> ¡Nuevo Evento!</span>
-            </div>
+    <!-- ===================== MODALES EXISTENTES ===================== -->
+    <div class="modal" id="modalAnuncios">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="close-btn" onclick="cerrarAnuncios()"><i class="fas fa-times"></i></div>
+            <h2><i class="fas fa-bullhorn"></i> Anuncios y Novedades</h2>
+            <p class="small-note">Mantente al día con las últimas noticias de la clase.</p>
+            <div id="anunciosContainer" style="display:flex; flex-direction:column; gap:15px; margin-top:20px;"></div>
         </div>
     </div>
-</div>
 
-<div class="modal" id="modalRecursosExternos">
-    <div class="modal-content" style="max-width: 500px;">
-        <div class="close-btn" onclick="cerrarRecursosExternos()"><i class="fas fa-times"></i></div>
-        <h2><i class="fas fa-globe"></i> Recursos Externos</h2>
-        <p class="small-note">Herramientas digitales adicionales para complementar tu aprendizaje.</p>
-        <div style="display:flex;flex-direction:column;gap:15px;margin-top:20px;">
-            <div class="menu-card" style="padding: 20px;" onclick="window.open('https://phet.colorado.edu/es/simulations/filter?subjects=chemistry&type=html', '_blank')">
-                <i class="fas fa-laptop-code"></i>
-                <h3>Simulaciones PhET</h3>
-                <p>Simulaciones interactivas de Química</p>
-            </div>
-            <div class="menu-card" style="padding: 20px;" onclick="window.open('https://ptable.com/?lang=es#', '_blank')">
-                <i class="fas fa-table"></i>
-                <h3>Tabla Periódica Dinámica</h3>
-                <p>Ptable - Propiedades y elementos</p>
-            </div>
+    <div class="modal" id="modalRecursosExternos">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="close-btn" onclick="cerrarRecursosExternos()"><i class="fas fa-times"></i></div>
+            <h2><i class="fas fa-globe"></i> Recursos Externos</h2>
+            <p class="small-note">Herramientas digitales adicionales para complementar tu aprendizaje.</p>
+            <div id="recursosExternosContainer" style="display:flex;flex-direction:column;gap:15px;margin-top:20px;"></div>
         </div>
     </div>
-</div>
 
-<div class="modal" id="modalCredenciales">
-    <div class="modal-content" style="max-width: 600px;">
-        <div class="close-btn" onclick="cerrarCredenciales()"><i class="fas fa-times"></i></div>
-        <h2><i class="fas fa-id-card"></i> Tus Credenciales</h2>
-        <p class="small-note">Puedes consultar tu ZipGrade ID si no lo recuerdas, o buscar directamente tu contraseña.</p>
-        
-        <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #1e90ff;">
-            <h4 style="color: #1e90ff; margin-bottom: 10px;">1. ¿Olvidaste tu Código ZipGrade?</h4>
-            <input type="text" id="inputBuscarApellidos" placeholder="Escribe tus apellidos (Ej: PEREZ BEJARANO)">
-            <button onclick="buscarSoloZipGrade()" style="background: #1e90ff; color: white; width: 100%;"><i class="fas fa-search"></i> Buscar mi Código ZipGrade</button>
-        </div>
-
-        <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border-left: 4px solid var(--amarillo);">
-            <h4 style="color: var(--amarillo); margin-bottom: 10px;">2. Consultar Contraseña</h4>
-            <input type="text" id="inputZipGrade" placeholder="Código ZipGrade ID (Ej: 112342026)">
-            <input type="text" id="inputApellido" placeholder="Tu Primer Apellido (Ej: PEREZ)">
-            <button onclick="buscarContrasena()" style="width: 100%;"><i class="fas fa-key"></i> Revelar Contraseña</button>
-        </div>
-        
-        <div id="resultadosCredenciales" style="max-height: 400px; overflow-y: auto; margin-top: 20px;">
+    <div class="modal" id="modalCredenciales">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="close-btn" onclick="cerrarCredenciales()"><i class="fas fa-times"></i></div>
+            <h2><i class="fas fa-id-card"></i> Tus Credenciales</h2>
+            <p class="small-note">Puedes consultar tu ZipGrade ID si no lo recuerdas, o buscar directamente tu contraseña.</p>
+            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #1e90ff;">
+                <h4 style="color: #1e90ff; margin-bottom: 10px;">1. ¿Olvidaste tu Código ZipGrade?</h4>
+                <input type="text" id="inputBuscarApellidos" placeholder="Escribe tus apellidos (Ej: PEREZ BEJARANO)">
+                <button onclick="buscarSoloZipGrade()" style="background: #1e90ff; color: white; width: 100%;"><i class="fas fa-search"></i> Buscar mi Código ZipGrade</button>
+            </div>
+            <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border-left: 4px solid var(--amarillo);">
+                <h4 style="color: var(--amarillo); margin-bottom: 10px;">2. Consultar Contraseña</h4>
+                <input type="text" id="inputZipGrade" placeholder="Código ZipGrade ID (Ej: 112342026)">
+                <input type="text" id="inputApellido" placeholder="Tu Primer Apellido (Ej: PEREZ)">
+                <button onclick="buscarContrasena()" style="width: 100%;"><i class="fas fa-key"></i> Revelar Contraseña</button>
+            </div>
+            <div id="resultadosCredenciales" style="max-height: 400px; overflow-y: auto; margin-top: 20px;"></div>
         </div>
     </div>
-</div>
 
-<div class="modal" id="modalLabs">
-    <div class="modal-content" style="max-width: 500px;">
-        <div class="close-btn" onclick="cerrarLabs()"><i class="fas fa-times"></i></div>
-        <h2>Laboratorio Virtual SJ</h2>
-        <div style="display:flex;flex-direction:column;gap:15px;margin-top:20px;">
-            
-            <div class="menu-card" style="padding: 20px;" onclick="window.open('https://eddedd-edu.github.io/TABLAPER/', '_blank')">
-                <i class="fas fa-table"></i>
-                <h3>Tabla Periódica</h3>
-                <p>Explora los elementos químicos</p>
-            </div>
-
-            <div class="menu-card" style="padding: 20px;" onclick="window.open('https://eddedd-edu.github.io/Lab-LeyesGas/')">
-                <i class="fas fa-wind"></i>
-                <h3>Leyes de los Gases</h3>
-            </div>
-            
-            <div class="menu-card" style="padding: 20px;" onclick="window.open('https://eddedd-edu.github.io/Lab-Atomo/')">
-                <i class="fas fa-atom"></i>
-                <h3>Laboratorio del Átomo</h3>
-            </div>
-            
-            <div class="menu-card" style="padding: 20px;" onclick="window.open('https://eddedd-edu.github.io/Lab-Enlaces/')">
-                <i class="fas fa-project-diagram"></i>
-                <h3>Laboratorio de Enlaces</h3>
-            </div>
-            
-            <div class="menu-card" style="padding: 20px; border-color: #2ed573;" onclick="window.open('https://eddedd-edu.github.io/Carbonquest/')">
-                <i class="fas fa-flask" style="color: #2ed573;"></i>
-                <h3 style="color: #2ed573;">CarbonoQuest PRO</h3>
-                <p>Química Orgánica</p>
-            </div>
-
-            <div class="menu-card" style="padding: 20px; border-color: #ff4757;" onclick="window.open('https://eddedd-edu.github.io/scapeRoom/')">
-                <i class="fas fa-door-closed" style="color: #ff4757;"></i>
-                <h3 style="color: #ff4757;">ScapeRoom</h3>
-                <p>Reto de Escape</p>
-            </div>
+    <div class="modal" id="modalLabs">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="close-btn" onclick="cerrarLabs()"><i class="fas fa-times"></i></div>
+            <h2>Laboratorio Virtual SJ</h2>
+            <div id="labsContainer" style="display:flex;flex-direction:column;gap:15px;margin-top:20px;"></div>
         </div>
     </div>
-</div>
 
-<div class="modal" id="modalEncuesta">
-    <div class="modal-content">
-        <div class="close-btn" onclick="cerrarEncuesta()"><i class="fas fa-times"></i></div>
-        <h2>Encuesta a Estudiantes (Anexo 3 - MEN)</h2>
-        <p class="small-note">Por favor responda con la mayor objetividad. Esta encuesta se guardará automáticamente.</p>
-        
-        <form id="formEncuesta">
-            <h3>Datos generales</h3>
-            <div class="question" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
-                <div>
-                    <label>Establecimiento:</label>
-                    <input type="text" id="establecimiento" value="I.E.T. San José" required>
+    <div class="modal" id="modalEncuesta">
+        <div class="modal-content">
+            <div class="close-btn" onclick="cerrarEncuesta()"><i class="fas fa-times"></i></div>
+            <h2>Encuesta a Estudiantes (Anexo 3 - MEN)</h2>
+            <p class="small-note">Por favor responda con la mayor objetividad. Esta encuesta se guardará automáticamente.</p>
+            <form id="formEncuesta">
+                <h3>Datos generales</h3>
+                <div class="question" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                    <div><label>Establecimiento:</label><input type="text" id="establecimiento" value="I.E.T. San José" required></div>
+                    <div><label>Jornada:</label><input type="text" id="jornada" placeholder="Ej. Mañana" required></div>
+                    <div><label>Grado y curso:</label><input type="text" id="grado" placeholder="Ej. 10-1" required></div>
+                    <div><label>Fecha:</label><input type="date" id="fecha" required></div>
+                    <div><label>Asignatura:</label><input type="text" id="asignatura" placeholder="Ej. Química" required></div>
                 </div>
-                <div>
-                    <label>Jornada:</label>
-                    <input type="text" id="jornada" placeholder="Ej. Mañana" required>
+                <div class="question">
+                    <h4>1. El profesor entregó el programa de la asignatura al inicio del curso</h4>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <label style="flex:1"><input type="radio" name="q1" value="Sí" required> Sí</label>
+                        <label style="flex:1"><input type="radio" name="q1" value="No"> No</label>
+                    </div>
                 </div>
-                <div>
-                    <label>Grado y curso:</label>
-                    <input type="text" id="grado" placeholder="Ej. 10-1" required>
+                <h3>EL PROFESOR</h3>
+                <script>
+                    window.listaPreguntas.forEach((pregunta, index) => {
+                        const qNum = index + 2;
+                        if (qNum === 16) document.write('<h3>LAS CLASES</h3>');
+                        document.write(`
+                            <div class="question">
+                                <h4>${qNum}. ${pregunta}</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+                                    <label><input type="radio" name="q${qNum}" value="Nunca" required> Nunca</label>
+                                    <label><input type="radio" name="q${qNum}" value="Algunas veces"> Algunas veces</label>
+                                    <label><input type="radio" name="q${qNum}" value="Casi siempre"> Casi siempre</label>
+                                    <label><input type="radio" name="q${qNum}" value="Siempre"> Siempre</label>
+                                </div>
+                            </div>`);
+                    });
+                </script>
+                <h3>20. ¿Cuáles de los siguientes recursos usa el profesor para desarrollar sus clases?</h3>
+                <div class="question" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
+                    <label><input type="checkbox" class="recursos" value="Tablero"> Tablero</label>
+                    <label><input type="checkbox" class="recursos" value="Películas y videos"> Películas y videos</label>
+                    <label><input type="checkbox" class="recursos" value="Láminas y gráficos"> Láminas y otros materiales gráficos</label>
+                    <label><input type="checkbox" class="recursos" value="Computadores"> Computadores</label>
+                    <label><input type="checkbox" class="recursos" value="Diapositivas"> Diapositivas o acetatos</label>
+                    <label><input type="checkbox" class="recursos" value="Música"> Música</label>
+                    <label><input type="checkbox" class="recursos" value="Libros"> Libros de texto</label>
+                    <label><input type="checkbox" class="recursos" value="Laboratorios"> Laboratorios</label>
+                    <label><input type="checkbox" class="recursos" value="Software"> Programas computarizados</label>
+                    <label><input type="checkbox" class="recursos" value="Mapas"> Mapas</label>
+                    <label><input type="checkbox" class="recursos" value="Otros"> Otros</label>
                 </div>
-                <div>
-                    <label>Fecha:</label>
-                    <input type="date" id="fecha" required>
+                <div style="margin-top:30px; text-align: right;">
+                    <button type="submit" class="submit" style="width: 100%; padding: 15px; font-size: 1.1rem;"><i class="fas fa-paper-plane"></i> Enviar Encuesta</button>
                 </div>
-                <div>
-                    <label>Asignatura:</label>
-                    <input type="text" id="asignatura" placeholder="Ej. Química" required>
-                </div>
-            </div>
-
-            <div class="question">
-                <h4>1. El profesor entregó el programa de la asignatura al inicio del curso</h4>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <label style="flex:1"><input type="radio" name="q1" value="Sí" required> Sí</label>
-                    <label style="flex:1"><input type="radio" name="q1" value="No"> No</label>
-                </div>
-            </div>
-
-            <h3>EL PROFESOR</h3>
-            <script>
-                window.listaPreguntas.forEach((pregunta, index) => {
-                    const qNum = index + 2;
-                    if(qNum === 16) document.write('<h3>LAS CLASES</h3>');
-                    document.write(`
-                        <div class="question">
-                            <h4>${qNum}. ${pregunta}</h4>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
-                                <label><input type="radio" name="q${qNum}" value="Nunca" required> Nunca</label>
-                                <label><input type="radio" name="q${qNum}" value="Algunas veces"> Algunas veces</label>
-                                <label><input type="radio" name="q${qNum}" value="Casi siempre"> Casi siempre</label>
-                                <label><input type="radio" name="q${qNum}" value="Siempre"> Siempre</label>
-                            </div>
-                        </div>
-                    `);
-                });
-            </script>
-
-            <h3>20. ¿Cuáles de los siguientes recursos usa el profesor para desarrollar sus clases?</h3>
-            <div class="question" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
-                <label><input type="checkbox" class="recursos" value="Tablero"> Tablero</label>
-                <label><input type="checkbox" class="recursos" value="Películas y videos"> Películas y videos</label>
-                <label><input type="checkbox" class="recursos" value="Láminas y gráficos"> Láminas y otros materiales gráficos</label>
-                <label><input type="checkbox" class="recursos" value="Computadores"> Computadores</label>
-                <label><input type="checkbox" class="recursos" value="Diapositivas"> Diapositivas o acetatos</label>
-                <label><input type="checkbox" class="recursos" value="Música"> Música</label>
-                <label><input type="checkbox" class="recursos" value="Libros"> Libros de texto</label>
-                <label><input type="checkbox" class="recursos" value="Laboratorios"> Laboratorios</label>
-                <label><input type="checkbox" class="recursos" value="Software"> Programas computarizados</label>
-                <label><input type="checkbox" class="recursos" value="Mapas"> Mapas</label>
-                <label><input type="checkbox" class="recursos" value="Otros"> Otros</label>
-            </div>
-
-            <div style="margin-top:30px; text-align: right;">
-                <button type="submit" class="submit" style="width: 100%; padding: 15px; font-size: 1.1rem;"><i class="fas fa-paper-plane"></i> Enviar Encuesta</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div class="modal" id="modalLogin">
-    <div class="modal-content" style="max-width: 400px;">
-        <div class="close-btn" onclick="cerrarLogin()"><i class="fas fa-times"></i></div>
-        <h2 style="text-align: center;">Ingreso Panel</h2>
-        <input type="email" id="email" placeholder="Correo Administrativo">
-        <input type="password" id="password" placeholder="Contraseña">
-        <div style="margin-top:20px;">
-            <button onclick="login()" style="width: 100%;"><i class="fas fa-sign-in-alt"></i> Ingresar</button>
+            </form>
         </div>
     </div>
-</div>
 
-<div class="modal" id="modalPanel">
-    <div class="modal-content">
-        <div class="close-btn" onclick="cerrarPanel()"><i class="fas fa-times"></i></div>
-        <h2><i class="fas fa-chart-bar"></i> Panel Estadístico</h2>
-        
-        <div class="filter-bar">
-            <button onclick="logout()" class="btn-danger"><i class="fas fa-power-off"></i> Salir</button>
-            <div style="flex-grow: 1;"></div> 
-            <label style="margin:0; font-weight: 500;">Grado:</label>
-            <select id="filtroGrado"><option value="">Todos</option></select>
-            <label style="margin:0; font-weight: 500;">Asignatura:</label>
-            <select id="filtroAsignatura"><option value="">Todas</option></select>
-            <button onclick="aplicarFiltros()"><i class="fas fa-filter"></i> Filtrar</button>
-            <button onclick="exportarExcel()" class="btn-excel"><i class="fas fa-file-excel"></i> Excel</button>
-            <button onclick="exportarPDF()" class="btn-pdf"><i class="fas fa-file-pdf"></i> Informe PDF</button>
-        </div>
-
-        <div id="areaImprimir">
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <h3>Total Encuestas</h3>
-                    <span id="totalEncuestas">0</span>
-                </div>
-                <div class="stat-box">
-                    <h3>Promedio General</h3>
-                    <span id="promedioGeneral">0.00</span>
-                </div>
-            </div>
-            
-            <div class="chart-container">
-                <canvas id="graficoGeneral"></canvas>
+    <div class="modal" id="modalLogin">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="close-btn" onclick="cerrarLogin()"><i class="fas fa-times"></i></div>
+            <h2 style="text-align: center;">Ingreso Panel</h2>
+            <input type="email" id="email" placeholder="Correo Administrativo">
+            <input type="password" id="password" placeholder="Contraseña">
+            <div style="margin-top:20px;">
+                <button onclick="login()" style="width: 100%;"><i class="fas fa-sign-in-alt"></i> Ingresar</button>
             </div>
         </div>
-
     </div>
-</div>
 
-<footer>
-    © 2026 I.E.T. San José - Entorno Virtual
-</footer>
+    <div class="modal" id="modalPanel">
+        <div class="modal-content">
+            <div class="close-btn" onclick="cerrarPanel()"><i class="fas fa-times"></i></div>
+            <h2><i class="fas fa-chart-bar"></i> Panel Estadístico</h2>
+            <div class="filter-bar">
+                <button onclick="logout()" class="btn-danger"><i class="fas fa-power-off"></i> Salir</button>
+                <button onclick="abrirAdminDashboard()" class="btn-admin"><i class="fas fa-cog"></i> Administrar Dashboard</button>
+                <div style="flex-grow: 1;"></div>
+                <label style="margin:0; font-weight: 500;">Grado:</label>
+                <select id="filtroGrado"><option value="">Todos</option></select>
+                <label style="margin:0; font-weight: 500;">Asignatura:</label>
+                <select id="filtroAsignatura"><option value="">Todas</option></select>
+                <button onclick="aplicarFiltros()"><i class="fas fa-filter"></i> Filtrar</button>
+                <button onclick="exportarExcel()" class="btn-excel"><i class="fas fa-file-excel"></i> Excel</button>
+                <button onclick="exportarPDF()" class="btn-pdf"><i class="fas fa-file-pdf"></i> Informe PDF</button>
+            </div>
+            <div id="areaImprimir">
+                <div class="stats-grid">
+                    <div class="stat-box"><h3>Total Encuestas</h3><span id="totalEncuestas">0</span></div>
+                    <div class="stat-box"><h3>Promedio General</h3><span id="promedioGeneral">0.00</span></div>
+                </div>
+                <div class="chart-container"><canvas id="graficoGeneral"></canvas></div>
+            </div>
+        </div>
+    </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    <!-- ===================== MODAL ADMINISTRACIÓN DEL DASHBOARD ===================== -->
+    <div class="modal" id="modalAdmin">
+        <div class="modal-content" style="max-width: 950px;">
+            <div class="close-btn" onclick="cerrarAdminDashboard()"><i class="fas fa-times"></i></div>
+            <h2><i class="fas fa-cog"></i> Administración del Dashboard</h2>
+            <p class="small-note">Configura los botones del menú principal, anuncios, laboratorios y apariencia. Los cambios se guardan automáticamente en tu navegador.</p>
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
-    authDomain: "quimicaquest.firebaseapp.com",
-    projectId: "quimicaquest",
-    storageBucket: "quimicaquest.firebasestorage.app",
-    messagingSenderId: "796534851347",
-    appId: "1:796534851347:web:ae85716a8b612d889b3ce6"
-};
+            <!-- Pestañas -->
+            <div class="admin-tabs">
+                <div class="admin-tab active" onclick="switchAdminTab('botones')"><i class="fas fa-th-large"></i> Botones Menú</div>
+                <div class="admin-tab" onclick="switchAdminTab('anuncios')"><i class="fas fa-bullhorn"></i> Anuncios</div>
+                <div class="admin-tab" onclick="switchAdminTab('labs')"><i class="fas fa-flask"></i> Labs / Recursos</div>
+                <div class="admin-tab" onclick="switchAdminTab('apariencia')"><i class="fas fa-palette"></i> Apariencia</div>
+            </div>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+            <!-- TAB: Botones del Menú Principal -->
+            <div class="admin-tab-content active" id="tab-botones">
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px; align-items:center;">
+                    <button onclick="agregarNuevoBoton()" style="background:#2ed573; color:#000;"><i class="fas fa-plus-circle"></i> Agregar Botón</button>
+                    <button onclick="resetearBotones()" class="btn-outline btn-sm"><i class="fas fa-undo"></i> Restaurar Predeterminados</button>
+                    <span class="small-note" style="margin:0;">Total: <strong id="contadorBotones">0</strong> botones</span>
+                </div>
+                <div id="listaBotonesAdmin"></div>
+                <!-- Vista previa mini -->
+                <h4 style="margin-top:20px; color:#ddd;">📱 Vista Previa del Menú</h4>
+                <div class="preview-mini" id="previewMiniMenu"></div>
+            </div>
 
-let datosGlobal = [];
-window.datosFiltrados = []; 
-let chart;
+            <!-- TAB: Anuncios -->
+            <div class="admin-tab-content" id="tab-anuncios">
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                    <button onclick="agregarNuevoAnuncio()" style="background:#2ed573; color:#000;"><i class="fas fa-plus-circle"></i> Agregar Anuncio</button>
+                    <button onclick="resetearAnuncios()" class="btn-outline btn-sm"><i class="fas fa-undo"></i> Restaurar Predeterminados</button>
+                </div>
+                <div id="listaAnunciosAdmin"></div>
+            </div>
 
-/* --- ENCUESTA: envío y guardado --- */
-const formEncuesta = document.getElementById("formEncuesta");
-formEncuesta.addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    const jornada = document.getElementById("jornada").value.trim();
-    const grado = document.getElementById("grado").value.trim();
-    const fecha = document.getElementById("fecha").value;
-    const asignatura = document.getElementById("asignatura").value.trim();
-    const establecimiento = document.getElementById("establecimiento").value.trim();
-    
-    const q1 = document.querySelector('input[name="q1"]:checked');
-    if(!q1){ alert("Por favor responda la pregunta 1."); return; }
-    
-    const respuestas = {};
-    for(let i=2; i<=19; i++){
-        const sel = document.querySelector(`input[name="q${i}"]:checked`);
-        if(!sel){ alert(`Por favor responda la pregunta ${i}.`); return; }
-        respuestas[`q${i}`] = sel.value;
-    }
-    respuestas["q1"] = q1.value;
-    
-    const recursos = [];
-    document.querySelectorAll(".recursos:checked").forEach(cb=>recursos.push(cb.value));
-    
-    const data = {
-        establecimiento, jornada, grado, fecha, asignatura, respuestas, recursos, timestamp: new Date()
-    };
-    
-    const btnSubmit = document.querySelector(".submit");
-    btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-    btnSubmit.disabled = true;
+            <!-- TAB: Laboratorios y Recursos Externos -->
+            <div class="admin-tab-content" id="tab-labs">
+                <h3 style="margin-top:0;">🧪 Laboratorios (modal Labs)</h3>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                    <button onclick="agregarNuevoLab()" style="background:#2ed573; color:#000;"><i class="fas fa-plus-circle"></i> Agregar Laboratorio</button>
+                    <button onclick="resetearLabs()" class="btn-outline btn-sm"><i class="fas fa-undo"></i> Restaurar Labs</button>
+                </div>
+                <div id="listaLabsAdmin"></div>
+                <h3 style="margin-top:25px;">🌐 Recursos Externos</h3>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                    <button onclick="agregarNuevoRecursoExterno()" style="background:#2ed573; color:#000;"><i class="fas fa-plus-circle"></i> Agregar Recurso</button>
+                    <button onclick="resetearRecursosExternos()" class="btn-outline btn-sm"><i class="fas fa-undo"></i> Restaurar Recursos</button>
+                </div>
+                <div id="listaRecursosExternosAdmin"></div>
+            </div>
 
-    try{
-        await addDoc(collection(db, "encuestas_estudiantes"), data);
-        alert("✅ Encuesta guardada correctamente en la nube.");
-        formEncuesta.reset();
-        cerrarEncuesta();
-    }catch(err){
-        console.error(err);
-        alert("❌ Error al guardar la encuesta. Intente nuevamente.");
-    }finally{
-        btnSubmit.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Encuesta';
-        btnSubmit.disabled = false;
-    }
-});
+            <!-- TAB: Apariencia -->
+            <div class="admin-tab-content" id="tab-apariencia">
+                <h3 style="margin-top:0;">🎨 Personalización Visual</h3>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                    <div>
+                        <label>Título del Header</label>
+                        <input type="text" id="cfgHeaderTitulo" placeholder="ENTORNO VIRTUAL SJ" onchange="guardarApariencia()">
+                    </div>
+                    <div>
+                        <label>Subtítulo del Header</label>
+                        <input type="text" id="cfgHeaderSubtitulo" placeholder="I.E.T. San José - Fresno Tolima" onchange="guardarApariencia()">
+                    </div>
+                </div>
+                <div class="color-picker-row" style="margin-top:15px;">
+                    <label>Color Verde Principal <input type="color" id="cfgColorVerde" onchange="guardarApariencia()"></label>
+                    <label>Color Amarillo <input type="color" id="cfgColorAmarillo" onchange="guardarApariencia()"></label>
+                    <label>Color Verde Claro <input type="color" id="cfgColorVerdeClaro" onchange="guardarApariencia()"></label>
+                </div>
+                <button onclick="resetearApariencia()" class="btn-outline btn-sm" style="margin-top:15px;"><i class="fas fa-undo"></i> Restaurar Apariencia Predeterminada</button>
+                <p class="small-note" style="margin-top:10px;">Los cambios de color se aplican al instante. Se guardan en tu navegador.</p>
+            </div>
 
-/* --- LOGIN / AUTH --- */
-window.login = async function(){
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    
-    const btn = document.querySelector('#modalLogin button');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
-    
-    try{
-        await signInWithEmailAndPassword(auth, email, password);
-        cerrarLogin();
-        await window.cargarDatos(); 
-        document.getElementById("modalPanel").style.display = "flex";
-    }catch(err){
-        console.error(err);
-        alert("Credenciales incorrectas o error de conexión.");
-    }finally{
-        btn.innerHTML = originalText;
-    }
-};
+            <!-- Botón global de guardado y exportación -->
+            <div style="margin-top:25px; padding-top:15px; border-top:1px solid var(--borde); display:flex; gap:10px; flex-wrap:wrap;">
+                <button onclick="guardarTodoYRefrescar()" style="background:var(--amarillo); color:#000;"><i class="fas fa-save"></i> Guardar Todo y Refrescar Página</button>
+                <button onclick="exportarConfiguracion()" class="btn-outline btn-sm"><i class="fas fa-download"></i> Exportar Configuración</button>
+                <button onclick="importarConfiguracion()" class="btn-outline btn-sm"><i class="fas fa-upload"></i> Importar Configuración</button>
+            </div>
+        </div>
+    </div>
 
-/* --- PANEL: carga y graficado --- */
-window.cargarDatos = async function(){
-    try{
-        const snapshot = await getDocs(collection(db,"encuestas_estudiantes"));
-        datosGlobal = [];
-        snapshot.forEach(doc => datosGlobal.push(doc.data()));
-        poblarFiltros();
-        aplicarFiltros();
-    }catch(e){
-        console.error("Error leyendo encuestas:", e);
-        alert("Error de permisos. Revisa la consola (Presiona F12).");
-    }
-};
+    <!-- Modal para editar/crear un botón individual -->
+    <div class="modal" id="modalEditorBoton">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="close-btn" onclick="cerrarEditorBoton()"><i class="fas fa-times"></i></div>
+            <h2 id="editorBotonTitulo">Editar Botón</h2>
+            <input type="hidden" id="editorBotonId">
+            <label>Título del Botón</label>
+            <input type="text" id="editorBotonTituloInput" placeholder="Ej: Laboratorio Virtual">
+            <label>Descripción</label>
+            <input type="text" id="editorBotonDesc" placeholder="Texto descriptivo corto">
+            <label>Icono (clase Font Awesome)</label>
+            <input type="text" id="editorBotonIcono" placeholder="Ej: fas fa-flask">
+            <p class="small-note" style="margin-top:-8px;">Puedes buscar iconos en <a href="https://fontawesome.com/icons" target="_blank" style="color:#ffc926;">FontAwesome</a></p>
+            <label>Tipo de Acción</label>
+            <select id="editorBotonTipo" onchange="toggleEditorBotonCampos()">
+                <option value="modal">Abrir Modal Interno</option>
+                <option value="link">Abrir Enlace Externo</option>
+            </select>
+            <div id="editorBotonModalSelect">
+                <label>Modal a Abrir</label>
+                <select id="editorBotonModalId">
+                    <option value="modalLabs">Laboratorios</option>
+                    <option value="modalAnuncios">Anuncios</option>
+                    <option value="modalCredenciales">Credenciales</option>
+                    <option value="modalEncuesta">Encuesta</option>
+                    <option value="modalLogin">Panel Estadístico (Login)</option>
+                    <option value="modalRecursosExternos">Recursos Externos</option>
+                </select>
+            </div>
+            <div id="editorBotonLinkDiv" style="display:none;">
+                <label>URL / Enlace</label>
+                <input type="url" id="editorBotonLink" placeholder="https://...">
+            </div>
+            <label>
+                <input type="checkbox" id="editorBotonAlerta"> Mostrar indicador de alerta (punto rojo)
+            </label>
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button onclick="guardarEdicionBoton()" style="background:#2ed573; color:#000; flex:1;"><i class="fas fa-check"></i> Guardar Botón</button>
+                <button onclick="cerrarEditorBoton()" class="btn-outline" style="flex:1;">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
-window.aplicarFiltros = function(){
-    const gradoFiltro = document.getElementById("filtroGrado").value;
-    const asignaturaFiltro = document.getElementById("filtroAsignatura").value;
+    <!-- Modal para editar/crear un anuncio -->
+    <div class="modal" id="modalEditorAnuncio">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="close-btn" onclick="cerrarEditorAnuncio()"><i class="fas fa-times"></i></div>
+            <h2 id="editorAnuncioTitulo">Editar Anuncio</h2>
+            <input type="hidden" id="editorAnuncioId">
+            <label>Título del Anuncio</label>
+            <input type="text" id="editorAnuncioTituloInput" placeholder="Ej: ¡Nuevo Laboratorio!">
+            <label>Contenido / Descripción</label>
+            <textarea id="editorAnuncioContenido" placeholder="Texto del anuncio..."></textarea>
+            <label>Color del Borde Izquierdo</label>
+            <input type="color" id="editorAnuncioColor" value="#2ed573">
+            <label>Enlace (opcional)</label>
+            <input type="url" id="editorAnuncioLink" placeholder="https://...">
+            <label>Texto del Botón (si hay enlace)</label>
+            <input type="text" id="editorAnuncioBtnTexto" placeholder="Ej: Ingresar al Laboratorio">
+            <label>Etiqueta pequeña (opcional)</label>
+            <input type="text" id="editorAnuncioEtiqueta" placeholder="Ej: ¡Nuevo Recurso!">
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button onclick="guardarEdicionAnuncio()" style="background:#2ed573; color:#000; flex:1;"><i class="fas fa-check"></i> Guardar Anuncio</button>
+                <button onclick="cerrarEditorAnuncio()" class="btn-outline" style="flex:1;">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
-    window.datosFiltrados = datosGlobal.filter(d=>{
-        return (gradoFiltro==="" || d.grado===gradoFiltro) &&
-               (asignaturaFiltro==="" || d.asignatura===asignaturaFiltro);
-    });
+    <!-- Modal para editar/crear un lab o recurso externo -->
+    <div class="modal" id="modalEditorLabRecurso">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="close-btn" onclick="cerrarEditorLabRecurso()"><i class="fas fa-times"></i></div>
+            <h2 id="editorLabRecursoTitulo">Editar Elemento</h2>
+            <input type="hidden" id="editorLabRecursoId">
+            <input type="hidden" id="editorLabRecursoTipo">
+            <label>Título</label>
+            <input type="text" id="editorLabRecursoTituloInput" placeholder="Ej: Tabla Periódica">
+            <label>Descripción</label>
+            <input type="text" id="editorLabRecursoDesc" placeholder="Texto descriptivo">
+            <label>Icono (clase Font Awesome)</label>
+            <input type="text" id="editorLabRecursoIcono" placeholder="Ej: fas fa-table">
+            <label>Enlace</label>
+            <input type="url" id="editorLabRecursoLink" placeholder="https://...">
+            <label>Color del Icono (opcional, ej: #2ed573)</label>
+            <input type="text" id="editorLabRecursoColorIcono" placeholder="Dejar vacío para color por defecto">
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button onclick="guardarEdicionLabRecurso()" style="background:#2ed573; color:#000; flex:1;"><i class="fas fa-check"></i> Guardar</button>
+                <button onclick="cerrarEditorLabRecurso()" class="btn-outline" style="flex:1;">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
-    document.getElementById("totalEncuestas").innerText = window.datosFiltrados.length;
-    let conteo = {Nunca:0,"Algunas veces":0,"Casi siempre":0,Siempre:0};
-    let suma=0, totalRespuestas=0;
-    
-    window.datosFiltrados.forEach(d=>{
-        const respObj = d.respuestas || {};
-        Object.values(respObj).forEach(r=>{
-            if(conteo.hasOwnProperty(r)) conteo[r]++;
-            suma += (r==="Nunca"?1 : r==="Algunas veces"?2 : r==="Casi siempre"?3 : r==="Siempre"?4 : 0);
-            if(r !== "Sí" && r !== "No") totalRespuestas++; 
+    <footer>© 2026 I.E.T. San José - Entorno Virtual</footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc } from
+        "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from
+        "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
+            authDomain: "quimicaquest.firebaseapp.com",
+            projectId: "quimicaquest",
+            storageBucket: "quimicaquest.firebasestorage.app",
+            messagingSenderId: "796534851347",
+            appId: "1:796534851347:web:ae85716a8b612d889b3ce6"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        let datosGlobal = [];
+        window.datosFiltrados = [];
+        let chart;
+
+        const formEncuesta = document.getElementById("formEncuesta");
+        formEncuesta.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const jornada = document.getElementById("jornada").value.trim();
+            const grado = document.getElementById("grado").value.trim();
+            const fecha = document.getElementById("fecha").value;
+            const asignatura = document.getElementById("asignatura").value.trim();
+            const establecimiento = document.getElementById("establecimiento").value.trim();
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            if (!q1) { alert("Por favor responda la pregunta 1."); return; }
+            const respuestas = {};
+            for (let i = 2; i <= 19; i++) {
+                const sel = document.querySelector(`input[name="q${i}"]:checked`);
+                if (!sel) { alert(`Por favor responda la pregunta ${i}.`); return; }
+                respuestas[`q${i}`] = sel.value;
+            }
+            respuestas["q1"] = q1.value;
+            const recursos = [];
+            document.querySelectorAll(".recursos:checked").forEach(cb => recursos.push(cb.value));
+            const data = { establecimiento, jornada, grado, fecha, asignatura, respuestas, recursos,
+            timestamp: new Date() };
+            const btnSubmit = document.querySelector(".submit");
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            btnSubmit.disabled = true;
+            try {
+                await addDoc(collection(db, "encuestas_estudiantes"), data);
+                alert("✅ Encuesta guardada correctamente en la nube.");
+                formEncuesta.reset();
+                cerrarEncuesta();
+            } catch (err) {
+                console.error(err);
+                alert("❌ Error al guardar la encuesta. Intente nuevamente.");
+            } finally {
+                btnSubmit.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Encuesta';
+                btnSubmit.disabled = false;
+            }
         });
-    });
-    
-    const promedio = totalRespuestas>0 ? (suma/totalRespuestas).toFixed(2) : "0.00";
-    document.getElementById("promedioGeneral").innerText = promedio;
-    generarGrafico(conteo);
-};
 
-function generarGrafico(conteo){
-    const ctx = document.getElementById("graficoGeneral");
-    if(chart) chart.destroy();
-    
-    Chart.defaults.color = '#ffffff';
-    Chart.defaults.font.family = "'Poppins', sans-serif";
+        window.login = async function() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const btn = document.querySelector('#modalLogin button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                cerrarLogin();
+                await window.cargarDatos();
+                document.getElementById("modalPanel").style.display = "flex";
+            } catch (err) {
+                console.error(err);
+                alert("Credenciales incorrectas o error de conexión.");
+            } finally {
+                btn.innerHTML = originalText;
+            }
+        };
 
-    chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: Object.keys(conteo),
-            datasets: [{
-                label: 'Frecuencia de Respuestas',
-                data: Object.values(conteo),
-                backgroundColor: ['#ff4757', '#ffa502', '#2ed573', '#1e90ff'],
-                borderRadius: 8,
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: { 
-                y: { 
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255,255,255,0.1)' }
+        window.cargarDatos = async function() {
+            try {
+                const snapshot = await getDocs(collection(db, "encuestas_estudiantes"));
+                datosGlobal = [];
+                snapshot.forEach(doc => datosGlobal.push(doc.data()));
+                poblarFiltros();
+                aplicarFiltros();
+            } catch (e) {
+                console.error("Error leyendo encuestas:", e);
+                alert("Error de permisos. Revisa la consola (Presiona F12).");
+            }
+        };
+
+        window.aplicarFiltros = function() {
+            const gradoFiltro = document.getElementById("filtroGrado").value;
+            const asignaturaFiltro = document.getElementById("filtroAsignatura").value;
+            window.datosFiltrados = datosGlobal.filter(d => {
+                return (gradoFiltro === "" || d.grado === gradoFiltro) && (asignaturaFiltro === "" || d
+                    .asignatura === asignaturaFiltro);
+            });
+            document.getElementById("totalEncuestas").innerText = window.datosFiltrados.length;
+            let conteo = { Nunca: 0, "Algunas veces": 0, "Casi siempre": 0, Siempre: 0 };
+            let suma = 0,
+                totalRespuestas = 0;
+            window.datosFiltrados.forEach(d => {
+                const respObj = d.respuestas || {};
+                Object.values(respObj).forEach(r => {
+                    if (conteo.hasOwnProperty(r)) conteo[r]++;
+                    suma += (r === "Nunca" ? 1 : r === "Algunas veces" ? 2 : r === "Casi siempre" ? 3 :
+                        r === "Siempre" ? 4 : 0);
+                    if (r !== "Sí" && r !== "No") totalRespuestas++;
+                });
+            });
+            const promedio = totalRespuestas > 0 ? (suma / totalRespuestas).toFixed(2) : "0.00";
+            document.getElementById("promedioGeneral").innerText = promedio;
+            generarGrafico(conteo);
+        };
+
+        function generarGrafico(conteo) {
+            const ctx = document.getElementById("graficoGeneral");
+            if (chart) chart.destroy();
+            Chart.defaults.color = '#ffffff';
+            Chart.defaults.font.family = "'Poppins', sans-serif";
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(conteo),
+                    datasets: [{
+                        label: 'Frecuencia de Respuestas',
+                        data: Object.values(conteo),
+                        backgroundColor: ['#ff4757', '#ffa502', '#2ed573', '#1e90ff'],
+                        borderRadius: 8,
+                        borderWidth: 0
+                    }]
                 },
-                x: {
-                    grid: { display: false }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function poblarFiltros() {
+            const selGrado = document.getElementById("filtroGrado");
+            const selAsig = document.getElementById("filtroAsignatura");
+            selGrado.innerHTML = '<option value="">Todos</option>';
+            selAsig.innerHTML = '<option value="">Todas</option>';
+            const grados = [...new Set(datosGlobal.map(d => d.grado).filter(Boolean))].sort();
+            const asignaturas = [...new Set(datosGlobal.map(d => d.asignatura).filter(Boolean))].sort();
+            grados.forEach(g => selGrado.innerHTML += `<option value="${g}">${g}</option>`);
+            asignaturas.forEach(a => selAsig.innerHTML += `<option value="${a}">${a}</option>`);
+        }
+
+        window.exportarExcel = function() {
+            if (!window.datosFiltrados || window.datosFiltrados.length === 0) { alert(
+                    "No hay datos para exportar."); return; }
+            const datosExcel = window.datosFiltrados.map(d => {
+                let fila = { Establecimiento: d.establecimiento, Jornada: d.jornada, Grado: d.grado,
+                    Asignatura: d.asignatura, Fecha: d.fecha, "P1_Entregó_Programa": d.respuestas?.q1 ||
+                        '' };
+                for (let i = 2; i <= 19; i++) { fila[`Pregunta_${i}`] = d.respuestas?.[`q${i}`] || ''; }
+                fila.Recursos_Usados = d.recursos ? d.recursos.join(', ') : '';
+                return fila;
+            });
+            const hoja = XLSX.utils.json_to_sheet(datosExcel);
+            const libro = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(libro, hoja, "Estadisticas");
+            XLSX.writeFile(libro, "Reporte_SanJose.xlsx");
+        };
+
+        window.exportarPDF = async function() {
+            if (!window.datosFiltrados || window.datosFiltrados.length === 0) { alert(
+                    "No hay datos para generar el informe."); return; }
+            const btnPdf = document.querySelector('.btn-pdf');
+            const originalText = btnPdf.innerHTML;
+            btnPdf.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando Informe...';
+            btnPdf.disabled = true;
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                let y = 20;
+                let total = window.datosFiltrados.length;
+                let q1Si = 0;
+                let sumasPorPregunta = {};
+                let conteoRecursos = {};
+                for (let i = 2; i <= 19; i++) sumasPorPregunta[`q${i}`] = 0;
+                window.datosFiltrados.forEach(d => {
+                    if (d.respuestas?.q1 === "Sí") q1Si++;
+                    for (let i = 2; i <= 19; i++) {
+                        let val = d.respuestas?.[`q${i}`];
+                        let num = val === "Nunca" ? 1 : val === "Algunas veces" ? 2 : val ===
+                            "Casi siempre" ? 3 : val === "Siempre" ? 4 : 0;
+                        sumasPorPregunta[`q${i}`] += num;
+                    }
+                    if (d.recursos) { d.recursos.forEach(r => { conteoRecursos[r] = (conteoRecursos[r] ||
+                                0) + 1; }); }
+                });
+                let q1Porcentaje = ((q1Si / total) * 100).toFixed(1);
+                let promediosPreguntas = [];
+                for (let i = 2; i <= 19; i++) { promediosPreguntas.push({ num: i, texto: window
+                        .listaPreguntas[i - 2], promedio: total > 0 ? (sumasPorPregunta[`q${i}`] /
+                        total) : 0 }); }
+                promediosPreguntas.sort((a, b) => b.promedio - a.promedio);
+                let fortalezas = promediosPreguntas.slice(0, 2);
+                let mejoras = promediosPreguntas.slice(-2).reverse();
+                let recursosOrdenados = Object.entries(conteoRecursos).sort((a, b) => b[1] - a[1]);
+                pdf.setFont("helvetica", "bold");
+                pdf.setFontSize(18);
+                pdf.setTextColor(15, 61, 30);
+                pdf.text("INFORME DE EVALUACIÓN DOCENTE", pageWidth / 2, y, { align: "center" });
+                y += 8;
+                pdf.setFont("helvetica", "normal");
+                pdf.setFontSize(11);
+                pdf.setTextColor(50, 50, 50);
+                const grado = document.getElementById("filtroGrado").value || 'Todos los grados';
+                const asig = document.getElementById("filtroAsignatura").value || 'Todas las asignaturas';
+                pdf.text(`Institución Educativa Técnica San José`, pageWidth / 2, y, { align: "center" });
+                y += 6;
+                pdf.text(`Filtro aplicado: ${grado} | ${asig}`, pageWidth / 2, y, { align: "center" });
+                y += 15;
+                pdf.setFont("helvetica", "bold");
+                pdf.setFontSize(14);
+                pdf.setTextColor(0, 0, 0);
+                pdf.text("1. Resumen Cuantitativo", 15, y);
+                y += 8;
+                pdf.setFont("helvetica", "normal");
+                pdf.setFontSize(11);
+                pdf.text(`• Total de encuestas analizadas: ${total}`, 15, y);
+                y += 6;
+                pdf.text(
+                    `• Promedio General (Escala 1 a 4): ${document.getElementById("promedioGeneral").innerText}`,
+                    15, y);
+                y += 6;
+                pdf.text(
+                    `• El ${q1Porcentaje}% de los estudiantes afirma que se entregó el programa al inicio.`,
+                    15, y);
+                y += 12;
+                pdf.setFont("helvetica", "bold");
+                pdf.setFontSize(14);
+                pdf.text("2. Análisis Descriptivo", 15, y);
+                y += 8;
+                pdf.setFont("helvetica", "bold");
+                pdf.setFontSize(11);
+                pdf.setTextColor(26, 107, 53);
+                pdf.text("Principales Fortalezas (Mejores promedios):", 15, y);
+                y += 6;
+                pdf.setFont("helvetica", "normal");
+                pdf.setTextColor(50, 50, 50);
+                fortalezas.forEach(f => {
+                    let texto =
+                        `• P${f.num}: ${f.texto} (Promedio: ${f.promedio.toFixed(2)})`;
+                    let lineas = pdf.splitTextToSize(texto, pageWidth - 30);
+                    pdf.text(lineas, 15, y);
+                    y += lineas.length * 5;
+                });
+                y += 4;
+                pdf.setFont("helvetica", "bold");
+                pdf.setTextColor(200, 50, 50);
+                pdf.text("Oportunidades de Mejora (Promedios más bajos):", 15, y);
+                y += 6;
+                pdf.setFont("helvetica", "normal");
+                pdf.setTextColor(50, 50, 50);
+                mejoras.forEach(m => {
+                    let texto =
+                        `• P${m.num}: ${m.texto} (Promedio: ${m.promedio.toFixed(2)})`;
+                    let lineas = pdf.splitTextToSize(texto, pageWidth - 30);
+                    pdf.text(lineas, 15, y);
+                    y += lineas.length * 5;
+                });
+                y += 4;
+                pdf.setFont("helvetica", "bold");
+                pdf.setTextColor(0, 0, 0);
+                pdf.text("Recursos Didácticos más utilizados:", 15, y);
+                y += 6;
+                pdf.setFont("helvetica", "normal");
+                if (recursosOrdenados.length > 0) {
+                    recursosOrdenados.slice(0, 3).forEach(r => { pdf.text(
+                            `• ${r[0]} (${r[1]} menciones)`, 15, y);
+                        y += 6; });
+                } else { pdf.text("• No se registraron recursos en estas encuestas.", 15, y);
+                    y += 6; }
+                y += 10;
+                pdf.setFont("helvetica", "bold");
+                pdf.setFontSize(14);
+                pdf.text("3. Gráfico de Frecuencia de Respuestas", 15, y);
+                y += 5;
+                const elemento = document.getElementById("graficoGeneral");
+                const canvas = await html2canvas(elemento, { scale: 2, backgroundColor: "#1a6b35" });
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = pageWidth - 30;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                if (y + imgHeight > pdf.internal.pageSize.getHeight() - 15) { pdf.addPage();
+                    y = 20; }
+                pdf.addImage(imgData, 'PNG', 15, y, imgWidth, imgHeight);
+                let nombreArchivo = `Informe_Evaluacion_${grado}_${asig}.pdf`.replace(/ /g, "_");
+                pdf.save(nombreArchivo);
+            } catch (err) {
+                console.error("Error al exportar PDF: ", err);
+                alert("Ocurrió un error al generar el PDF.");
+            } finally { btnPdf.innerHTML = originalText;
+                btnPdf.disabled = false; }
+        };
+        window.cargarDatos = window.cargarDatos || window.cargarDatos;
+    </script>
+
+    <script>
+        /* ============================================
+           SISTEMA DE CONFIGURACIÓN DEL DASHBOARD
+           ============================================ */
+        const STORAGE_KEY = 'dashboard_config_sanjose_v2';
+
+        // Configuración predeterminada
+        function getDefaultConfig() {
+            return {
+                header: {
+                    titulo: 'ENTORNO VIRTUAL SJ',
+                    subtitulo: 'I.E.T. San José - Fresno Tolima',
+                    logo: 'logo.png'
+                },
+                apariencia: {
+                    verde: '#0f3d1e',
+                    verdeClaro: '#1a6b35',
+                    amarillo: '#f2b705'
+                },
+                botones: [
+                    { id: 1, icono: 'fas fa-flask', titulo: 'Laboratorio Virtual SJ',
+                        descripcion: 'Haz click para elegir laboratorio', tipo: 'modal', modalId: 'modalLabs',
+                        link: '', alerta: false },
+                    { id: 2, icono: 'fas fa-folder-open', titulo: 'Material de Apoyo',
+                        descripcion: 'Guías, talleres y documentos', tipo: 'link', modalId: '', link: 'https://sedtolimaedu-my.sharepoint.com/:f:/g/personal/edison_avendano_sedtolima_edu_co/IgDYigqdoVH1TZ2j4l1sqdAAAaDbR27cLJJhdXkSb4yQRKY?e=1c3Fdl',
+                        alerta: false },
+                    { id: 3, icono: 'fas fa-globe', titulo: 'Recursos Externos',
+                        descripcion: 'Simulaciones y herramientas', tipo: 'modal', modalId: 'modalRecursosExternos',
+                        link: '', alerta: false },
+                    { id: 4, icono: 'fas fa-bullhorn', titulo: 'Tablero de Anuncios',
+                        descripcion: 'Novedades y recordatorios', tipo: 'modal', modalId: 'modalAnuncios', link: '',
+                        alerta: true },
+                    { id: 5, icono: 'fas fa-id-card', titulo: 'Consultar Credenciales',
+                        descripcion: 'Busca tu código y contraseña', tipo: 'modal', modalId: 'modalCredenciales',
+                        link: '', alerta: false },
+                    { id: 6, icono: 'fas fa-tasks', titulo: 'Quizzes', descripcion: 'Plataforma de pruebas',
+                        tipo: 'link', modalId: '', link: 'https://eddedd-edu.github.io/quizzes/#', alerta: false },
+                    { id: 7, icono: 'fas fa-check-circle', titulo: 'Evaluación Docente',
+                        descripcion: 'ZipGrade', tipo: 'link', modalId: '', link: 'https://www.zipgrade.com/s/',
+                        alerta: false },
+                    { id: 8, icono: 'fas fa-clipboard-list', titulo: 'Encuesta Estudiantes',
+                        descripcion: 'Evaluación anual (MEN)', tipo: 'modal', modalId: 'modalEncuesta', link: '',
+                        alerta: false },
+                    { id: 9, icono: 'fas fa-chart-pie', titulo: 'Panel Estadístico',
+                        descripcion: 'Acceso restringido', tipo: 'modal', modalId: 'modalLogin', link: '',
+                    alerta: false }
+                ],
+                anuncios: [
+                    { id: 1, titulo: '¡Nuevo Laboratorio: CarbonoQuest PRO!',
+                        contenido: 'Ya puedes acceder al entorno virtual de Química Orgánica. Explora las propiedades del átomo de carbono, tipos de fórmulas y supera el reto de síntesis.',
+                        color: '#2ed573', link: 'https://eddedd-edu.github.io/Carbonquest/',
+                        btnTexto: 'Ingresar al Laboratorio', etiqueta: '¡Nuevo Recurso!' },
+                    { id: 2, titulo: '¡Bienvenidos al Entorno Virtual!',
+                        contenido: 'Ya pueden consultar sus contraseñas en la sección "Consultar Credenciales". Recuerden que necesitarán su Código ZipGrade y su Apellido para ingresar.',
+                        color: '#f2b705', link: '', btnTexto: '', etiqueta: 'Publicado recientemente' },
+                    { id: 3, titulo: 'Nuevo Material Disponible',
+                        contenido: 'Se ha subido la guía de estudio para esta semana en la carpeta de <strong>Material de Apoyo</strong>. Por favor, revísenla antes de la próxima clase.',
+                        color: '#20c997', link: '', btnTexto: '', etiqueta: 'Recordatorio' },
+                    { id: 4, titulo: '¡Nuevo Desafío: ScapeRoom!',
+                        contenido: 'Pon a prueba tus conocimientos químicos para lograr escapar de nuestro laboratorio secreto. ¿Aceptas el reto?',
+                        color: '#ff4757', link: 'https://eddedd-edu.github.io/scapeRoom/',
+                        btnTexto: 'Entrar al ScapeRoom', etiqueta: '¡Nuevo Evento!' }
+                ],
+                labs: [
+                    { id: 1, titulo: 'Tabla Periódica', descripcion: 'Explora los elementos químicos',
+                        icono: 'fas fa-table', link: 'https://eddedd-edu.github.io/TABLAPER/',
+                    colorIcono: '' },
+                    { id: 2, titulo: 'Leyes de los Gases', descripcion: '', icono: 'fas fa-wind',
+                        link: 'https://eddedd-edu.github.io/Lab-LeyesGas/', colorIcono: '' },
+                    { id: 3, titulo: 'Laboratorio del Átomo', descripcion: '', icono: 'fas fa-atom',
+                        link: 'https://eddedd-edu.github.io/Lab-Atomo/', colorIcono: '' },
+                    { id: 4, titulo: 'Laboratorio de Enlaces', descripcion: '', icono: 'fas fa-project-diagram',
+                        link: 'https://eddedd-edu.github.io/Lab-Enlaces/', colorIcono: '' },
+                    { id: 5, titulo: 'CarbonoQuest PRO', descripcion: 'Química Orgánica', icono: 'fas fa-flask',
+                        link: 'https://eddedd-edu.github.io/Carbonquest/', colorIcono: '#2ed573' },
+                    { id: 6, titulo: 'ScapeRoom', descripcion: 'Reto de Escape', icono: 'fas fa-door-closed',
+                        link: 'https://eddedd-edu.github.io/scapeRoom/', colorIcono: '#ff4757' }
+                ],
+                recursosExternos: [
+                    { id: 1, titulo: 'Simulaciones PhET', descripcion: 'Simulaciones interactivas de Química',
+                        icono: 'fas fa-laptop-code',
+                        link: 'https://phet.colorado.edu/es/simulations/filter?subjects=chemistry&type=html',
+                        colorIcono: '' },
+                    { id: 2, titulo: 'Tabla Periódica Dinámica', descripcion: 'Ptable - Propiedades y elementos',
+                        icono: 'fas fa-table', link: 'https://ptable.com/?lang=es#', colorIcono: '' }
+                ]
+            };
+        }
+
+        function cargarConfiguracion() {
+            try {
+                const guardado = localStorage.getItem(STORAGE_KEY);
+                if (guardado) {
+                    const parsed = JSON.parse(guardado);
+                    return mergeConfig(getDefaultConfig(), parsed);
+                }
+            } catch (e) {
+                console.warn('Error al cargar configuración, usando predeterminada.', e);
+            }
+            return getDefaultConfig();
+        }
+
+        function mergeConfig(def, saved) {
+            const merged = { ...def };
+            if (saved.header) merged.header = { ...def.header, ...saved.header };
+            if (saved.apariencia) merged.apariencia = { ...def.apariencia, ...saved.apariencia };
+            if (saved.botones && Array.isArray(saved.botones)) merged.botones = saved.botones;
+            if (saved.anuncios && Array.isArray(saved.anuncios)) merged.anuncios = saved.anuncios;
+            if (saved.labs && Array.isArray(saved.labs)) merged.labs = saved.labs;
+            if (saved.recursosExternos && Array.isArray(saved.recursosExternos)) merged.recursosExternos = saved
+                .recursosExternos;
+            return merged;
+        }
+
+        function guardarConfiguracion(config) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+        }
+
+        let dashboardConfig = cargarConfiguracion();
+        guardarConfiguracion(dashboardConfig);
+
+        // Aplicar apariencia
+        function aplicarApariencia() {
+            const ap = dashboardConfig.apariencia;
+            document.documentElement.style.setProperty('--verde', ap.verde);
+            document.documentElement.style.setProperty('--verde-claro', ap.verdeClaro);
+            document.documentElement.style.setProperty('--amarillo', ap.amarillo);
+            document.getElementById('headerTitulo').textContent = dashboardConfig.header.titulo;
+            document.getElementById('headerSubtitulo').textContent = dashboardConfig.header.subtitulo;
+        }
+        aplicarApariencia();
+
+        // ==================== RENDERIZADO DEL MENÚ PRINCIPAL ====================
+        function renderizarMenu() {
+            const grid = document.getElementById('menuGrid');
+            grid.innerHTML = '';
+            dashboardConfig.botones.forEach(btn => {
+                const card = document.createElement('div');
+                card.className = 'menu-card';
+                if (btn.alerta) card.classList.add('has-alert');
+                card.setAttribute('data-id', btn.id);
+                card.innerHTML = `
+                    <i class="${btn.icono}"></i>
+                    <h3>${btn.titulo}</h3>
+                    <p>${btn.descripcion}</p>`;
+                card.addEventListener('click', () => ejecutarAccionBoton(btn));
+                grid.appendChild(card);
+            });
+        }
+
+        function ejecutarAccionBoton(btn) {
+            if (btn.tipo === 'link' && btn.link) {
+                window.open(btn.link, '_blank');
+            } else if (btn.tipo === 'modal' && btn.modalId) {
+                const modalMap = {
+                    'modalLabs': abrirLabs,
+                    'modalAnuncios': abrirAnuncios,
+                    'modalCredenciales': abrirCredenciales,
+                    'modalEncuesta': abrirEncuesta,
+                    'modalLogin': abrirLogin,
+                    'modalRecursosExternos': abrirRecursosExternos
+                };
+                if (modalMap[btn.modalId]) {
+                    modalMap[btn.modalId]();
                 }
             }
         }
-    });
-}
 
-function poblarFiltros(){
-    const selGrado = document.getElementById("filtroGrado");
-    const selAsig = document.getElementById("filtroAsignatura");
-    selGrado.innerHTML = '<option value="">Todos</option>';
-    selAsig.innerHTML = '<option value="">Todas</option>';
-    
-    const grados = [...new Set(datosGlobal.map(d=>d.grado).filter(Boolean))].sort();
-    const asignaturas = [...new Set(datosGlobal.map(d=>d.asignatura).filter(Boolean))].sort();
-    
-    grados.forEach(g => selGrado.innerHTML += `<option value="${g}">${g}</option>`);
-    asignaturas.forEach(a => selAsig.innerHTML += `<option value="${a}">${a}</option>`);
-};
-
-/* --- EXPORTACIÓN --- */
-window.exportarExcel = function() {
-    if(!window.datosFiltrados || window.datosFiltrados.length === 0) {
-        alert("No hay datos para exportar.");
-        return;
-    }
-    
-    const datosExcel = window.datosFiltrados.map(d => {
-        let fila = {
-            Establecimiento: d.establecimiento,
-            Jornada: d.jornada,
-            Grado: d.grado,
-            Asignatura: d.asignatura,
-            Fecha: d.fecha,
-            "P1_Entregó_Programa": d.respuestas?.q1 || ''
-        };
-        for(let i = 2; i <= 19; i++) {
-            fila[`Pregunta_${i}`] = d.respuestas?.[`q${i}`] || '';
-        }
-        fila.Recursos_Usados = d.recursos ? d.recursos.join(', ') : '';
-        return fila;
-    });
-
-    const hoja = XLSX.utils.json_to_sheet(datosExcel);
-    const libro = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(libro, hoja, "Estadisticas");
-    XLSX.writeFile(libro, "Reporte_SanJose.xlsx");
-};
-
-window.exportarPDF = async function() {
-    if(!window.datosFiltrados || window.datosFiltrados.length === 0) {
-        alert("No hay datos para generar el informe.");
-        return;
-    }
-
-    const btnPdf = document.querySelector('.btn-pdf');
-    const originalText = btnPdf.innerHTML;
-    
-    btnPdf.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando Informe...';
-    btnPdf.disabled = true;
-
-    try {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        let y = 20;
-
-        let total = window.datosFiltrados.length;
-        let q1Si = 0;
-        let sumasPorPregunta = {};
-        let conteoRecursos = {};
-
-        for(let i=2; i<=19; i++) sumasPorPregunta[`q${i}`] = 0;
-
-        window.datosFiltrados.forEach(d => {
-            if(d.respuestas?.q1 === "Sí") q1Si++;
-            
-            for(let i=2; i<=19; i++){
-                let val = d.respuestas?.[`q${i}`];
-                let num = val==="Nunca"?1 : val==="Algunas veces"?2 : val==="Casi siempre"?3 : val==="Siempre"?4 : 0;
-                sumasPorPregunta[`q${i}`] += num;
-            }
-
-            if(d.recursos) {
-                d.recursos.forEach(r => {
-                    conteoRecursos[r] = (conteoRecursos[r] || 0) + 1;
-                });
-            }
-        });
-
-        let q1Porcentaje = ((q1Si / total) * 100).toFixed(1);
-        let promediosPreguntas = [];
-        
-        for(let i=2; i<=19; i++) {
-            promediosPreguntas.push({
-                num: i,
-                texto: window.listaPreguntas[i-2],
-                promedio: total > 0 ? (sumasPorPregunta[`q${i}`] / total) : 0
+        // ==================== RENDERIZADO DE ANUNCIOS ====================
+        function renderizarAnuncios() {
+            const container = document.getElementById('anunciosContainer');
+            container.innerHTML = '';
+            dashboardConfig.anuncios.forEach(an => {
+                const div = document.createElement('div');
+                div.style.cssText = `
+                    background: rgba(0,0,0,0.2);
+                    border-left: 4px solid ${an.color};
+                    padding: 15px;
+                    border-radius: 8px;
+                `;
+                let html = `<h4 style="color: ${an.color}; margin-bottom: 5px;">${an.titulo}</h4>`;
+                html +=
+                    `<p style="font-size: 0.95rem; margin-bottom: 5px;">${an.contenido}</p>`;
+                if (an.link && an.btnTexto) {
+                    html +=
+                        `<a href="${an.link}" target="_blank" style="display:inline-block; margin-top:8px; padding:8px 15px; background:${an.color}; color:#000; text-decoration:none; border-radius:8px; font-weight:bold; font-size:0.9rem;">${an.btnTexto}</a><br>`;
+                }
+                if (an.etiqueta) {
+                    html +=
+                        `<span style="font-size: 0.8rem; opacity: 0.6; margin-top:10px; display:inline-block;"><i class="far fa-calendar-alt"></i> ${an.etiqueta}</span>`;
+                }
+                div.innerHTML = html;
+                container.appendChild(div);
             });
         }
-        
-        promediosPreguntas.sort((a, b) => b.promedio - a.promedio);
-        let fortalezas = promediosPreguntas.slice(0, 2);
-        let mejoras = promediosPreguntas.slice(-2).reverse();
-        let recursosOrdenados = Object.entries(conteoRecursos).sort((a,b) => b[1] - a[1]);
 
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(18);
-        pdf.setTextColor(15, 61, 30);
-        pdf.text("INFORME DE EVALUACIÓN DOCENTE", pageWidth/2, y, {align: "center"});
-        y += 8;
-
-        pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(11);
-        pdf.setTextColor(50, 50, 50);
-        const grado = document.getElementById("filtroGrado").value || 'Todos los grados';
-        const asig = document.getElementById("filtroAsignatura").value || 'Todas las asignaturas';
-        
-        pdf.text(`Institución Educativa Técnica San José`, pageWidth/2, y, {align: "center"});
-        y += 6;
-        pdf.text(`Filtro aplicado: ${grado} | ${asig}`, pageWidth/2, y, {align: "center"});
-        y += 15;
-
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(14);
-        pdf.setTextColor(0, 0, 0);
-        pdf.text("1. Resumen Cuantitativo", 15, y);
-        y += 8;
-        
-        pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(11);
-        pdf.text(`• Total de encuestas analizadas: ${total}`, 15, y); y += 6;
-        pdf.text(`• Promedio General (Escala 1 a 4): ${document.getElementById("promedioGeneral").innerText}`, 15, y); y += 6;
-        pdf.text(`• El ${q1Porcentaje}% de los estudiantes afirma que se entregó el programa al inicio.`, 15, y); y += 12;
-
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(14);
-        pdf.text("2. Análisis Descriptivo", 15, y);
-        y += 8;
-
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(11);
-        pdf.setTextColor(26, 107, 53); 
-        pdf.text("Principales Fortalezas (Mejores promedios):", 15, y);
-        y += 6;
-        pdf.setFont("helvetica", "normal");
-        pdf.setTextColor(50, 50, 50);
-        fortalezas.forEach(f => {
-            let texto = `• P${f.num}: ${f.texto} (Promedio: ${f.promedio.toFixed(2)})`;
-            let lineas = pdf.splitTextToSize(texto, pageWidth - 30);
-            pdf.text(lineas, 15, y);
-            y += lineas.length * 5;
-        });
-        y += 4;
-
-        pdf.setFont("helvetica", "bold");
-        pdf.setTextColor(200, 50, 50); 
-        pdf.text("Oportunidades de Mejora (Promedios más bajos):", 15, y);
-        y += 6;
-        pdf.setFont("helvetica", "normal");
-        pdf.setTextColor(50, 50, 50);
-        mejoras.forEach(m => {
-            let texto = `• P${m.num}: ${m.texto} (Promedio: ${m.promedio.toFixed(2)})`;
-            let lineas = pdf.splitTextToSize(texto, pageWidth - 30);
-            pdf.text(lineas, 15, y);
-            y += lineas.length * 5;
-        });
-        y += 4;
-
-        pdf.setFont("helvetica", "bold");
-        pdf.setTextColor(0, 0, 0);
-        pdf.text("Recursos Didácticos más utilizados:", 15, y);
-        y += 6;
-        pdf.setFont("helvetica", "normal");
-        if(recursosOrdenados.length > 0) {
-            recursosOrdenados.slice(0, 3).forEach(r => {
-                pdf.text(`• ${r[0]} (${r[1]} menciones)`, 15, y);
-                y += 6;
+        // ==================== RENDERIZADO DE LABS ====================
+        function renderizarLabs() {
+            const container = document.getElementById('labsContainer');
+            container.innerHTML = '';
+            dashboardConfig.labs.forEach(lab => {
+                const card = document.createElement('div');
+                card.className = 'menu-card';
+                card.style.padding = '20px';
+                if (lab.colorIcono) card.style.borderColor = lab.colorIcono;
+                card.innerHTML = `
+                    <i class="${lab.icono}" style="${lab.colorIcono ? 'color:' + lab.colorIcono : ''}"></i>
+                    <h3 style="${lab.colorIcono ? 'color:' + lab.colorIcono : ''}">${lab.titulo}</h3>
+                    ${lab.descripcion ? '<p>' + lab.descripcion + '</p>' : ''}`;
+                card.addEventListener('click', () => window.open(lab.link, '_blank'));
+                container.appendChild(card);
             });
-        } else {
-            pdf.text("• No se registraron recursos en estas encuestas.", 15, y);
-            y += 6;
-        }
-        y += 10;
-
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(14);
-        pdf.text("3. Gráfico de Frecuencia de Respuestas", 15, y);
-        y += 5;
-
-        const elemento = document.getElementById("graficoGeneral");
-        const canvas = await html2canvas(elemento, { 
-            scale: 2, 
-            backgroundColor: "#1a6b35"
-        });
-        const imgData = canvas.toDataURL('image/png');
-        
-        const imgWidth = pageWidth - 30;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
-        if (y + imgHeight > pdf.internal.pageSize.getHeight() - 15) {
-            pdf.addPage();
-            y = 20;
         }
 
-        pdf.addImage(imgData, 'PNG', 15, y, imgWidth, imgHeight);
+        // ==================== RENDERIZADO DE RECURSOS EXTERNOS ====================
+        function renderizarRecursosExternos() {
+            const container = document.getElementById('recursosExternosContainer');
+            container.innerHTML = '';
+            dashboardConfig.recursosExternos.forEach(rec => {
+                const card = document.createElement('div');
+                card.className = 'menu-card';
+                card.style.padding = '20px';
+                card.innerHTML = `
+                    <i class="${rec.icono}"></i>
+                    <h3>${rec.titulo}</h3>
+                    ${rec.descripcion ? '<p>' + rec.descripcion + '</p>' : ''}`;
+                card.addEventListener('click', () => window.open(rec.link, '_blank'));
+                container.appendChild(card);
+            });
+        }
 
-        let nombreArchivo = `Informe_Evaluacion_${grado}_${asig}.pdf`.replace(/ /g, "_");
-        pdf.save(nombreArchivo);
-        
-    } catch(err) {
-        console.error("Error al exportar PDF: ", err);
-        alert("Ocurrió un error al generar el PDF.");
-    } finally {
-        btnPdf.innerHTML = originalText;
-        btnPdf.disabled = false;
-    }
-};
+        // Renderizado inicial
+        renderizarMenu();
+        renderizarAnuncios();
+        renderizarLabs();
+        renderizarRecursosExternos();
 
-window.cargarDatos = window.cargarDatos || window.cargarDatos;
-</script>
+        // ==================== ADMIN: ABRIR/CERRAR ====================
+        function abrirAdminDashboard() {
+            document.getElementById('modalAdmin').style.display = 'flex';
+            refrescarListaBotonesAdmin();
+            refrescarListaAnunciosAdmin();
+            refrescarListaLabsAdmin();
+            refrescarListaRecursosExternosAdmin();
+            cargarCamposApariencia();
+            switchAdminTab('botones');
+        }
 
-<script>
-/* UI helpers */
-function abrirLabs(){ document.getElementById("modalLabs").style.display="flex"; }
-function cerrarLabs(){ document.getElementById("modalLabs").style.display="none"; }
-function abrirRecursosExternos(){ document.getElementById("modalRecursosExternos").style.display="flex"; }
-function cerrarRecursosExternos(){ document.getElementById("modalRecursosExternos").style.display="none"; }
-function abrirEncuesta(){ document.getElementById("modalEncuesta").style.display="flex"; }
-function cerrarEncuesta(){ document.getElementById("modalEncuesta").style.display="none"; }
-function abrirLogin(){ document.getElementById("modalLogin").style.display="flex"; }
-function cerrarLogin(){ document.getElementById("modalLogin").style.display="none"; }
-function abrirPanel(){ document.getElementById("modalLogin").style.display="flex"; }
-function cerrarPanel(){ document.getElementById("modalPanel").style.display="none"; }
+        function cerrarAdminDashboard() {
+            document.getElementById('modalAdmin').style.display = 'none';
+        }
 
-/* Helpers Consultar Credenciales */
-function abrirCredenciales(){ 
-    document.getElementById("modalCredenciales").style.display="flex"; 
-    document.getElementById("inputBuscarApellidos").value = "";
-    document.getElementById("inputZipGrade").value = "";
-    document.getElementById("inputApellido").value = "";
-    document.getElementById("resultadosCredenciales").innerHTML = '';
-}
-function cerrarCredenciales(){ 
-    document.getElementById("modalCredenciales").style.display="none"; 
-}
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+            const tabBtn = document.querySelector(`.admin-tab[onclick*="${tab}"]`);
+            if (tabBtn) tabBtn.classList.add('active');
+            const tabContent = document.getElementById('tab-' + tab);
+            if (tabContent) tabContent.classList.add('active');
+            if (tab === 'botones') {
+                refrescarListaBotonesAdmin();
+                refrescarPreviewMini();
+            }
+            if (tab === 'anuncios') refrescarListaAnunciosAdmin();
+            if (tab === 'labs') {
+                refrescarListaLabsAdmin();
+                refrescarListaRecursosExternosAdmin();
+            }
+            if (tab === 'apariencia') cargarCamposApariencia();
+        }
 
-/* Helpers Anuncios */
-function abrirAnuncios(){ 
-    document.getElementById("modalAnuncios").style.display="flex";
-    
-    // Remueve la animación de alerta una vez el usuario ha hecho clic
-    const cardAnuncios = document.getElementById("cardAnuncios");
-    if(cardAnuncios) {
-        cardAnuncios.classList.remove("has-alert");
-    }
-}
-function cerrarAnuncios(){ document.getElementById("modalAnuncios").style.display="none"; }
+        // ==================== ADMIN: BOTONES ====================
+        function refrescarListaBotonesAdmin() {
+            const lista = document.getElementById('listaBotonesAdmin');
+            document.getElementById('contadorBotones').textContent = dashboardConfig.botones.length;
+            lista.innerHTML = dashboardConfig.botones.map((btn, index) => `
+                <div class="btn-list-item">
+                    <div class="btn-icon-preview"><i class="${btn.icono}"></i></div>
+                    <div class="btn-info">
+                        <strong>${btn.titulo}</strong>
+                        <small>${btn.descripcion} &nbsp;|&nbsp; <span class="badge ${btn.tipo === 'modal' ? 'badge-modal' : 'badge-link'}">${btn.tipo === 'modal' ? 'Modal: ' + btn.modalId : 'Enlace'}</span> ${btn.alerta ? '<span class="badge badge-alert">Alerta</span>' : ''}</small>
+                    </div>
+                    <div class="btn-actions">
+                        <button class="btn-sm btn-outline" onclick="editarBoton(${btn.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-sm btn-outline" onclick="moverBoton(${index}, -1)" ${index === 0 ? 'disabled' : ''}><i class="fas fa-arrow-up"></i></button>
+                        <button class="btn-sm btn-outline" onclick="moverBoton(${index}, 1)" ${index === dashboardConfig.botones.length - 1 ? 'disabled' : ''}><i class="fas fa-arrow-down"></i></button>
+                        <button class="btn-sm btn-danger" onclick="eliminarBoton(${btn.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            refrescarPreviewMini();
+        }
 
-/* =========================================
-   NUEVAS FUNCIONES DE BÚSQUEDA 
-========================================= */
+        function refrescarPreviewMini() {
+            const preview = document.getElementById('previewMiniMenu');
+            preview.innerHTML = dashboardConfig.botones.map(btn => `
+                <div class="mini-card">
+                    <i class="${btn.icono}"></i>
+                    <strong>${btn.titulo.substring(0, 20)}</strong>
+                </div>
+            `).join('');
+        }
 
-// Helper para quitar tildes y normalizar
-function normalizarTexto(texto) {
-    if (!texto) return '';
-    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-}
+        function moverBoton(index, direccion) {
+            const newIndex = index + direccion;
+            if (newIndex < 0 || newIndex >= dashboardConfig.botones.length) return;
+            const temp = dashboardConfig.botones[index];
+            dashboardConfig.botones[index] = dashboardConfig.botones[newIndex];
+            dashboardConfig.botones[newIndex] = temp;
+            guardarConfiguracion(dashboardConfig);
+            refrescarListaBotonesAdmin();
+            renderizarMenu();
+            mostrarToast('Orden actualizado ✅');
+        }
 
-// 1. Buscar únicamente el ZipGrade ID por Apellidos
-function buscarSoloZipGrade() {
-    const inputRaw = document.getElementById("inputBuscarApellidos").value;
-    const inputApellidos = normalizarTexto(inputRaw);
-    const resultadosDiv = document.getElementById("resultadosCredenciales");
-    
-    if (!inputApellidos) {
-        resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa tu apellido.</p>";
-        return;
-    }
-    
-    // Mejorada la compatibilidad de búsqueda omitiendo tildes
-    const filtrados = window.estudiantesData.filter(est => {
-        if (!est["Last Name"]) return false;
-        const apellidoDB = normalizarTexto(est["Last Name"].toString());
-        return apellidoDB.includes(inputApellidos);
-    });
-    
-    if (filtrados.length === 0) {
-        resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ff4757;'>❌ No se encontraron estudiantes con esos apellidos en nuestra base de datos.</p>";
-        return;
-    }
-    
-    let html = '<div class="stats-grid" style="gap:10px; margin-top:15px; grid-template-columns: 1fr;">';
-    filtrados.forEach(est => {
-        html += `
-        <div class="stat-box" style="text-align:left; background:rgba(0,0,0,0.3); padding: 15px; border-left: 4px solid #1e90ff;">
-            <h4 style="color:#1e90ff; margin-bottom:5px; font-size:1.1rem;">${est["First Name"] || ''} ${est["Last Name"] || ''}</h4>
-            <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Clase:</strong> ${est["Classes"] || 'No asignada'}</p>
-            <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Tu Código ZipGrade ID es:</strong> <span style="background:rgba(255,255,255,0.1); padding:3px 8px; border-radius:5px; font-family: monospace; font-size: 1.1rem; color: #fff;">${est["ZipGrade ID"]}</span></p>
-        </div>`;
-    });
-    html += '</div>';
-    
-    document.getElementById("inputBuscarApellidos").value = "";
-    resultadosDiv.innerHTML = html;
-}
+        function eliminarBoton(id) {
+            if (!confirm('¿Eliminar este botón del menú?')) return;
+            dashboardConfig.botones = dashboardConfig.botones.filter(b => b.id !== id);
+            guardarConfiguracion(dashboardConfig);
+            refrescarListaBotonesAdmin();
+            renderizarMenu();
+            mostrarToast('Botón eliminado 🗑️');
+        }
 
-// 2. Buscar Contraseña (Requiere ZipGrade ID exacto y Apellido)
-function buscarContrasena() {
-    const inputZip = document.getElementById("inputZipGrade").value.trim();
-    const inputRawApellido = document.getElementById("inputApellido").value;
-    const inputApellido = normalizarTexto(inputRawApellido);
-    const resultadosDiv = document.getElementById("resultadosCredenciales");
-    
-    if (!inputZip || !inputApellido) {
-        resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa tu Código ZipGrade y tu Apellido para ver la contraseña.</p>";
-        return;
-    }
-    
-    const filtrados = window.estudiantesData.filter(est => {
-        const idCoincide = est["ZipGrade ID"] && est["ZipGrade ID"].toString().trim() === inputZip;
-        if (!est["Last Name"]) return false;
-        const apellidoDB = normalizarTexto(est["Last Name"].toString());
-        const apellidoCoincide = apellidoDB.includes(inputApellido);
-        
-        return idCoincide && apellidoCoincide;
-    });
-    
-    if (filtrados.length === 0) {
-        resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ff4757;'>❌ Datos incorrectos. Verifica tu Código ZipGrade y que hayas escrito bien tu apellido.</p>";
-        return;
-    }
-    
-    let html = '<div class="stats-grid" style="gap:10px; margin-top:15px; grid-template-columns: 1fr;">';
-    filtrados.forEach(est => {
-        html += `
-        <div class="stat-box" style="text-align:left; background:rgba(0,0,0,0.3); padding: 15px; border-left: 4px solid var(--amarillo);">
-            <h4 style="color:var(--amarillo); margin-bottom:5px; font-size:1.1rem;">${est["First Name"] || ''} ${est["Last Name"] || ''}</h4>
-            <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Contraseña de Acceso:</strong> <span style="background:var(--verde-claro); padding:3px 8px; border-radius:5px; font-family: monospace; font-size: 1.1rem; color: white;">${est["Access Code"]}</span></p>
-        </div>`;
-    });
-    html += '</div>';
-    
-    document.getElementById("inputZipGrade").value = "";
-    document.getElementById("inputApellido").value = "";
-    resultadosDiv.innerHTML = html;
-}
-</script>
+        function agregarNuevoBoton() {
+            const nuevoId = Math.max(0, ...dashboardConfig.botones.map(b => b.id)) + 1;
+            document.getElementById('editorBotonId').value = nuevoId;
+            document.getElementById('editorBotonTitulo').textContent = 'Agregar Nuevo Botón';
+            document.getElementById('editorBotonTituloInput').value = '';
+            document.getElementById('editorBotonDesc').value = '';
+            document.getElementById('editorBotonIcono').value = 'fas fa-circle';
+            document.getElementById('editorBotonTipo').value = 'modal';
+            document.getElementById('editorBotonModalId').value = 'modalLabs';
+            document.getElementById('editorBotonLink').value = '';
+            document.getElementById('editorBotonAlerta').checked = false;
+            toggleEditorBotonCampos();
+            document.getElementById('modalEditorBoton').style.display = 'flex';
+        }
 
+        function editarBoton(id) {
+            const btn = dashboardConfig.botones.find(b => b.id === id);
+            if (!btn) return;
+            document.getElementById('editorBotonId').value = btn.id;
+            document.getElementById('editorBotonTitulo').textContent = 'Editar Botón';
+            document.getElementById('editorBotonTituloInput').value = btn.titulo;
+            document.getElementById('editorBotonDesc').value = btn.descripcion;
+            document.getElementById('editorBotonIcono').value = btn.icono;
+            document.getElementById('editorBotonTipo').value = btn.tipo;
+            document.getElementById('editorBotonModalId').value = btn.modalId || 'modalLabs';
+            document.getElementById('editorBotonLink').value = btn.link || '';
+            document.getElementById('editorBotonAlerta').checked = btn.alerta;
+            toggleEditorBotonCampos();
+            document.getElementById('modalEditorBoton').style.display = 'flex';
+        }
+
+        function toggleEditorBotonCampos() {
+            const tipo = document.getElementById('editorBotonTipo').value;
+            document.getElementById('editorBotonModalSelect').style.display = tipo === 'modal' ? 'block' : 'none';
+            document.getElementById('editorBotonLinkDiv').style.display = tipo === 'link' ? 'block' : 'none';
+        }
+
+        function guardarEdicionBoton() {
+            const id = parseInt(document.getElementById('editorBotonId').value);
+            const titulo = document.getElementById('editorBotonTituloInput').value.trim();
+            const descripcion = document.getElementById('editorBotonDesc').value.trim();
+            const icono = document.getElementById('editorBotonIcono').value.trim();
+            const tipo = document.getElementById('editorBotonTipo').value;
+            const modalId = document.getElementById('editorBotonModalId').value;
+            const link = document.getElementById('editorBotonLink').value.trim();
+            const alerta = document.getElementById('editorBotonAlerta').checked;
+
+            if (!titulo || !icono) { alert('Título e Icono son obligatorios.'); return; }
+            if (tipo === 'link' && !link) { alert('Debes ingresar un enlace para botones de tipo "link".'); return; }
+
+            const existente = dashboardConfig.botones.find(b => b.id === id);
+            if (existente) {
+                existente.titulo = titulo;
+                existente.descripcion = descripcion;
+                existente.icono = icono;
+                existente.tipo = tipo;
+                existente.modalId = tipo === 'modal' ? modalId : '';
+                existente.link = tipo === 'link' ? link : '';
+                existente.alerta = alerta;
+            } else {
+                dashboardConfig.botones.push({ id, icono, titulo, descripcion, tipo, modalId: tipo === 'modal' ?
+                        modalId : '', link: tipo === 'link' ? link : '', alerta });
+            }
+            guardarConfiguracion(dashboardConfig);
+            cerrarEditorBoton();
+            refrescarListaBotonesAdmin();
+            renderizarMenu();
+            mostrarToast('Botón guardado ✅');
+        }
+
+        function cerrarEditorBoton() {
+            document.getElementById('modalEditorBoton').style.display = 'none';
+        }
+
+        function resetearBotones() {
+            if (!confirm('¿Restaurar todos los botones del menú a sus valores predeterminados? Se perderán los cambios.')) return;
+            dashboardConfig.botones = getDefaultConfig().botones;
+            guardarConfiguracion(dashboardConfig);
+            refrescarListaBotonesAdmin();
+            renderizarMenu();
+            mostrarToast('Botones restaurados 🔄');
+        }
+
+        // ==================== ADMIN: ANUNCIOS ====================
+        function refrescarListaAnunciosAdmin() {
+            const lista = document.getElementById('listaAnunciosAdmin');
+            lista.innerHTML = dashboardConfig.anuncios.map((an, index) => `
+                <div class="btn-list-item">
+                    <div style="width:6px; height:40px; background:${an.color}; border-radius:3px; flex-shrink:0;"></div>
+                    <div class="btn-info">
+                        <strong>${an.titulo}</strong>
+                        <small>${an.contenido.substring(0, 60)}...</small>
+                    </div>
+                    <div class="btn-actions">
+                        <button class="btn-sm btn-outline" onclick="editarAnuncio(${an.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-sm btn-outline" onclick="moverAnuncio(${index}, -1)" ${index === 0 ? 'disabled' : ''}><i class="fas fa-arrow-up"></i></button>
+                        <button class="btn-sm btn-outline" onclick="moverAnuncio(${index}, 1)" ${index === dashboardConfig.anuncios.length - 1 ? 'disabled' : ''}><i class="fas fa-arrow-down"></i></button>
+                        <button class="btn-sm btn-danger" onclick="eliminarAnuncio(${an.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function agregarNuevoAnuncio() {
+            const nuevoId = Math.max(0, ...dashboardConfig.anuncios.map(a => a.id)) + 1;
+            document.getElementById('editorAnuncioId').value = nuevoId;
+            document.getElementById('editorAnuncioTitulo').textContent = 'Agregar Nuevo Anuncio';
+            document.getElementById('editorAnuncioTituloInput').value = '';
+            document.getElementById('editorAnuncioContenido').value = '';
+            document.getElementById('editorAnuncioColor').value = '#2ed573';
+            document.getElementById('editorAnuncioLink').value = '';
+            document.getElementById('editorAnuncioBtnTexto').value = '';
+            document.getElementById('editorAnuncioEtiqueta').value = '';
+            document.getElementById('modalEditorAnuncio').style.display = 'flex';
+        }
+
+        function editarAnuncio(id) {
+            const an = dashboardConfig.anuncios.find(a => a.id === id);
+            if (!an) return;
+            document.getElementById('editorAnuncioId').value = an.id;
+            document.getElementById('editorAnuncioTitulo').textContent = 'Editar Anuncio';
+            document.getElementById('editorAnuncioTituloInput').value = an.titulo;
+            document.getElementById('editorAnuncioContenido').value = an.contenido;
+            document.getElementById('editorAnuncioColor').value = an.color;
+            document.getElementById('editorAnuncioLink').value = an.link || '';
+            document.getElementById('editorAnuncioBtnTexto').value = an.btnTexto || '';
+            document.getElementById('editorAnuncioEtiqueta').value = an.etiqueta || '';
+            document.getElementById('modalEditorAnuncio').style.display = 'flex';
+        }
+
+        function guardarEdicionAnuncio() {
+            const id = parseInt(document.getElementById('editorAnuncioId').value);
+            const titulo = document.getElementById('editorAnuncioTituloInput').value.trim();
+            const contenido = document.getElementById('editorAnuncioContenido').value.trim();
+            const color = document.getElementById('editorAnuncioColor').value;
+            const link = document.getElementById('editorAnuncioLink').value.trim();
+            const btnTexto = document.getElementById('editorAnuncioBtnTexto').value.trim();
+            const etiqueta = document.getElementById('editorAnuncioEtiqueta').value.trim();
+            if (!titulo || !contenido) { alert('Título y Contenido son obligatorios.'); return; }
+            const existente = dashboardConfig.anuncios.find(a => a.id === id);
+            if (existente) {
+                existente.titulo = titulo;
+                existente.contenido = contenido;
+                existente.color = color;
+                existente.link = link;
+                existente.btnTexto = btnTexto;
+                existente.etiqueta = etiqueta;
+            } else {
+                dashboardConfig.anuncios.push({ id, titulo, contenido, color, link, btnTexto, etiqueta });
+            }
+            guardarConfiguracion(dashboardConfig);
+            cerrarEditorAnuncio();
+            refrescarListaAnunciosAdmin();
+            renderizarAnuncios();
+            mostrarToast('Anuncio guardado ✅');
+        }
+
+        function cerrarEditorAnuncio() { document.getElementById('modalEditorAnuncio').style.display = 'none'; }
+
+        function moverAnuncio(index, direccion) {
+            const newIndex = index + direccion;
+            if (newIndex < 0 || newIndex >= dashboardConfig.anuncios.length) return;
+            const temp = dashboardConfig.anuncios[index];
+            dashboardConfig.anuncios[index] = dashboardConfig.anuncios[newIndex];
+            dashboardConfig.anuncios[newIndex] = temp;
+            guardarConfiguracion(dashboardConfig);
+            refrescarListaAnunciosAdmin();
+            renderizarAnuncios();
+            mostrarToast('Orden actualizado ✅');
+        }
+
+        function eliminarAnuncio(id) {
+            if (!confirm('¿Eliminar este anuncio?')) return;
+            dashboardConfig.anuncios = dashboardConfig.anuncios.filter(a => a.id !== id);
+            guardarConfiguracion(dashboardConfig);
+            refrescarListaAnunciosAdmin();
+            renderizarAnuncios();
+            mostrarToast('Anuncio eliminado 🗑️');
+        }
+
+        function resetearAnuncios() {
+            if (!confirm('¿Restaurar anuncios predeterminados?')) return;
+            dashboardConfig.anuncios = getDefaultConfig().anuncios;
+            guardarConfiguracion(dashboardConfig);
+            refrescarListaAnunciosAdmin();
+            renderizarAnuncios();
+            mostrarToast('Anuncios restaurados 🔄');
+        }
+
+        // ==================== ADMIN: LABS Y RECURSOS EXTERNOS ====================
+        function refrescarListaLabsAdmin() {
+            const lista = document.getElementById('listaLabsAdmin');
+            lista.innerHTML = dashboardConfig.labs.map((lab, index) => `
+                <div class="btn-list-item">
+                    <div class="btn-icon-preview"><i class="${lab.icono}" style="${lab.colorIcono ? 'color:' + lab.colorIcono : ''}"></i></div>
+                    <div class="btn-info"><strong>${lab.titulo}</strong><small>${lab.descripcion || lab.link}</small></div>
+                    <div class="btn-actions">
+                        <button class="btn-sm btn-outline" onclick="editarLabRecurso('lab', ${lab.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-sm btn-outline" onclick="moverLabRecurso('lab', ${index}, -1)" ${index === 0 ? 'disabled' : ''}><i class="fas fa-arrow-up"></i></button>
+                        <button class="btn-sm btn-outline" onclick="moverLabRecurso('lab', ${index}, 1)" ${index === dashboardConfig.labs.length - 1 ? 'disabled' : ''}><i class="fas fa-arrow-down"></i></button>
+                        <button class="btn-sm btn-danger" onclick="eliminarLabRecurso('lab', ${lab.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function refrescarListaRecursosExternosAdmin() {
+            const lista = document.getElementById('listaRecursosExternosAdmin');
+            lista.innerHTML = dashboardConfig.recursosExternos.map((rec, index) => `
+                <div class="btn-list-item">
+                    <div class="btn-icon-preview"><i class="${rec.icono}"></i></div>
+                    <div class="btn-info"><strong>${rec.titulo}</strong><small>${rec.descripcion || rec.link}</small></div>
+                    <div class="btn-actions">
+                        <button class="btn-sm btn-outline" onclick="editarLabRecurso('recurso', ${rec.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-sm btn-outline" onclick="moverLabRecurso('recurso', ${index}, -1)" ${index === 0 ? 'disabled' : ''}><i class="fas fa-arrow-up"></i></button>
+                        <button class="btn-sm btn-outline" onclick="moverLabRecurso('recurso', ${index}, 1)" ${index === dashboardConfig.recursosExternos.length - 1 ? 'disabled' : ''}><i class="fas fa-arrow-down"></i></button>
+                        <button class="btn-sm btn-danger" onclick="eliminarLabRecurso('recurso', ${rec.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function agregarNuevoLab() {
+            const nuevoId = Math.max(0, ...dashboardConfig.labs.map(l => l.id)) + 1;
+            document.getElementById('editorLabRecursoId').value = nuevoId;
+            document.getElementById('editorLabRecursoTipo').value = 'lab';
+            document.getElementById('editorLabRecursoTitulo').textContent = 'Agregar Nuevo Laboratorio';
+            document.getElementById('editorLabRecursoTituloInput').value = '';
+            document.getElementById('editorLabRecursoDesc').value = '';
+            document.getElementById('editorLabRecursoIcono').value = 'fas fa-flask';
+            document.getElementById('editorLabRecursoLink').value = '';
+            document.getElementById('editorLabRecursoColorIcono').value = '';
+            document.getElementById('modalEditorLabRecurso').style.display = 'flex';
+        }
+
+        function agregarNuevoRecursoExterno() {
+            const nuevoId = Math.max(0, ...dashboardConfig.recursosExternos.map(r => r.id)) + 1;
+            document.getElementById('editorLabRecursoId').value = nuevoId;
+            document.getElementById('editorLabRecursoTipo').value = 'recurso';
+            document.getElementById('editorLabRecursoTitulo').textContent = 'Agregar Nuevo Recurso Externo';
+            document.getElementById('editorLabRecursoTituloInput').value = '';
+            document.getElementById('editorLabRecursoDesc').value = '';
+            document.getElementById('editorLabRecursoIcono').value = 'fas fa-globe';
+            document.getElementById('editorLabRecursoLink').value = '';
+            document.getElementById('editorLabRecursoColorIcono').value = '';
+            document.getElementById('modalEditorLabRecurso').style.display = 'flex';
+        }
+
+        function editarLabRecurso(tipo, id) {
+            const arr = tipo === 'lab' ? dashboardConfig.labs : dashboardConfig.recursosExternos;
+            const elem = arr.find(e => e.id === id);
+            if (!elem) return;
+            document.getElementById('editorLabRecursoId').value = elem.id;
+            document.getElementById('editorLabRecursoTipo').value = tipo;
+            document.getElementById('editorLabRecursoTitulo').textContent = 'Editar ' + (tipo === 'lab' ?
+                'Laboratorio' : 'Recurso Externo');
+            document.getElementById('editorLabRecursoTituloInput').value = elem.titulo;
+            document.getElementById('editorLabRecursoDesc').value = elem.descripcion || '';
+            document.getElementById('editorLabRecursoIcono').value = elem.icono;
+            document.getElementById('editorLabRecursoLink').value = elem.link;
+            document.getElementById('editorLabRecursoColorIcono').value = elem.colorIcono || '';
+            document.getElementById('modalEditorLabRecurso').style.display = 'flex';
+        }
+
+        function guardarEdicionLabRecurso() {
+            const id = parseInt(document.getElementById('editorLabRecursoId').value);
+            const tipo = document.getElementById('editorLabRecursoTipo').value;
+            const titulo = document.getElementById('editorLabRecursoTituloInput').value.trim();
+            const descripcion = document.getElementById('editorLabRecursoDesc').value.trim();
+            const icono = document.getElementById('editorLabRecursoIcono').value.trim();
+            const link = document.getElementById('editorLabRecursoLink').value.trim();
+            const colorIcono = document.getElementById('editorLabRecursoColorIcono').value.trim();
+            if (!titulo || !icono || !link) { alert('Título, Icono y Enlace son obligatorios.'); return; }
+            const arr = tipo === 'lab' ? dashboardConfig.labs : dashboardConfig.recursosExternos;
+            const existente = arr.find(e => e.id === id);
+            if (existente) {
+                existente.titulo = titulo;
+                existente.descripcion = descripcion;
+                existente.icono = icono;
+                existente.link = link;
+                existente.colorIcono = colorIcono;
+            } else {
+                arr.push({ id, titulo, descripcion, icono, link, colorIcono });
+            }
+            guardarConfiguracion(dashboardConfig);
+            cerrarEditorLabRecurso();
+            refrescarListaLabsAdmin();
+            refrescarListaRecursosExternosAdmin();
+            renderizarLabs();
+            renderizarRecursosExternos();
+            mostrarToast('Elemento guardado ✅');
+        }
+
+        function cerrarEditorLabRecurso() { document.getElementById('modalEditorLabRecurso').style.display =
+            'none'; }
+
+        function moverLabRecurso(tipo, index, direccion) {
+            const arr = tipo === 'lab' ? dashboardConfig.labs : dashboardConfig.recursosExternos;
+            const newIndex = index + direccion;
+            if (newIndex < 0 || newIndex >= arr.length) return;
+            const temp = arr[index];
+            arr[index] = arr[newIndex];
+            arr[newIndex] = temp;
+            guardarConfiguracion(dashboardConfig);
+            refrescarListaLabsAdmin();
+            refrescarListaRecursosExternosAdmin();
+            if (tipo === 'lab') renderizarLabs();
+            else renderizarRecursosExternos();
+            mostrarToast('Orden actualizado ✅');
+        }
+
+        function eliminarLabRecurso(tipo, id) {
+            if (!confirm('¿Eliminar este elemento?')) return;
+            if (tipo === 'lab') {
+                dashboardConfig.labs = dashboardConfig.labs.filter(l => l.id !== id);
+                refrescarListaLabsAdmin();
+                renderizarLabs();
+            } else {
+                dashboardConfig.recursosExternos = dashboardConfig.recursosExternos.filter(r => r.id !== id);
+                refrescarListaRecursosExternosAdmin();
+                renderizarRecursosExternos();
+            }
+            guardarConfiguracion(dashboardConfig);
+            mostrarToast('Elemento eliminado 🗑️');
+        }
+
+        function resetearLabs() {
+            if (!confirm('¿Restaurar laboratorios predeterminados?')) return;
+            dashboardConfig.labs = getDefaultConfig().labs;
+            guardarConfiguracion(dashboardConfig);
+            refrescarListaLabsAdmin();
+            renderizarLabs();
+            mostrarToast('Labs restaurados 🔄');
+        }
+
+        function resetearRecursosExternos() {
+            if (!confirm('¿Restaurar recursos externos predeterminados?')) return;
+            dashboardConfig.recursosExternos = getDefaultConfig().recursosExternos;
+            guardarConfiguracion(dashboardConfig);
+            refrescarListaRecursosExternosAdmin();
+            renderizarRecursosExternos();
+            mostrarToast('Recursos restaurados 🔄');
+        }
+
+        // ==================== ADMIN: APARIENCIA ====================
+        function cargarCamposApariencia() {
+            document.getElementById('cfgHeaderTitulo').value = dashboardConfig.header.titulo;
+            document.getElementById('cfgHeaderSubtitulo').value = dashboardConfig.header.subtitulo;
+            document.getElementById('cfgColorVerde').value = dashboardConfig.apariencia.verde;
+            document.getElementById('cfgColorAmarillo').value = dashboardConfig.apariencia.amarillo;
+            document.getElementById('cfgColorVerdeClaro').value = dashboardConfig.apariencia.verdeClaro;
+        }
+
+        function guardarApariencia() {
+            dashboardConfig.header.titulo = document.getElementById('cfgHeaderTitulo').value.trim() ||
+                'ENTORNO VIRTUAL SJ';
+            dashboardConfig.header.subtitulo = document.getElementById('cfgHeaderSubtitulo').value.trim() ||
+                'I.E.T. San José - Fresno Tolima';
+            dashboardConfig.apariencia.verde = document.getElementById('cfgColorVerde').value;
+            dashboardConfig.apariencia.amarillo = document.getElementById('cfgColorAmarillo').value;
+            dashboardConfig.apariencia.verdeClaro = document.getElementById('cfgColorVerdeClaro').value;
+            guardarConfiguracion(dashboardConfig);
+            aplicarApariencia();
+            mostrarToast('Apariencia guardada 🎨');
+        }
+
+        function resetearApariencia() {
+            if (!confirm('¿Restaurar apariencia predeterminada?')) return;
+            dashboardConfig.apariencia = getDefaultConfig().apariencia;
+            dashboardConfig.header = getDefaultConfig().header;
+            guardarConfiguracion(dashboardConfig);
+            aplicarApariencia();
+            cargarCamposApariencia();
+            mostrarToast('Apariencia restaurada 🔄');
+        }
+
+        // ==================== GUARDADO GLOBAL Y EXPORTACIÓN ====================
+        function guardarTodoYRefrescar() {
+            guardarConfiguracion(dashboardConfig);
+            aplicarApariencia();
+            renderizarMenu();
+            renderizarAnuncios();
+            renderizarLabs();
+            renderizarRecursosExternos();
+            mostrarToast('✅ Todo guardado. Refrescando...');
+            setTimeout(() => location.reload(), 800);
+        }
+
+        function exportarConfiguracion() {
+            const dataStr = JSON.stringify(dashboardConfig, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'dashboard_config_sanjose.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            mostrarToast('📥 Configuración exportada');
+        }
+
+        function importarConfiguracion() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const imported = JSON.parse(ev.target.result);
+                        dashboardConfig = mergeConfig(getDefaultConfig(), imported);
+                        guardarConfiguracion(dashboardConfig);
+                        aplicarApariencia();
+                        renderizarMenu();
+                        renderizarAnuncios();
+                        renderizarLabs();
+                        renderizarRecursosExternos();
+                        refrescarListaBotonesAdmin();
+                        refrescarListaAnunciosAdmin();
+                        refrescarListaLabsAdmin();
+                        refrescarListaRecursosExternosAdmin();
+                        cargarCamposApariencia();
+                        mostrarToast('📥 Configuración importada correctamente');
+                    } catch (err) {
+                        alert('❌ Error al leer el archivo. Asegúrate de que sea un JSON válido.');
+                        console.error(err);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // ==================== TOAST ====================
+        function mostrarToast(mensaje) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = mensaje;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        // ==================== UI HELPERS (mantener compatibilidad) ====================
+        function abrirLabs() { document.getElementById("modalLabs").style.display = "flex";
+            renderizarLabs(); }
+
+        function cerrarLabs() { document.getElementById("modalLabs").style.display = "none"; }
+
+        function abrirRecursosExternos() { document.getElementById("modalRecursosExternos").style.display = "flex";
+            renderizarRecursosExternos(); }
+
+        function cerrarRecursosExternos() { document.getElementById("modalRecursosExternos").style.display = "none"; }
+
+        function abrirEncuesta() { document.getElementById("modalEncuesta").style.display = "flex"; }
+
+        function cerrarEncuesta() { document.getElementById("modalEncuesta").style.display = "none"; }
+
+        function abrirLogin() { document.getElementById("modalLogin").style.display = "flex"; }
+
+        function cerrarLogin() { document.getElementById("modalLogin").style.display = "none"; }
+
+        function cerrarPanel() { document.getElementById("modalPanel").style.display = "none"; }
+
+        function abrirCredenciales() {
+            document.getElementById("modalCredenciales").style.display = "flex";
+            document.getElementById("inputBuscarApellidos").value = "";
+            document.getElementById("inputZipGrade").value = "";
+            document.getElementById("inputApellido").value = "";
+            document.getElementById("resultadosCredenciales").innerHTML = '';
+        }
+
+        function cerrarCredenciales() { document.getElementById("modalCredenciales").style.display = "none"; }
+
+        function abrirAnuncios() {
+            document.getElementById("modalAnuncios").style.display = "flex";
+            renderizarAnuncios();
+            const cardAnuncios = document.querySelector('[data-id="4"]');
+            if (cardAnuncios) cardAnuncios.classList.remove("has-alert");
+            const cardAnunciosOld = document.getElementById("cardAnuncios");
+            if (cardAnunciosOld) cardAnunciosOld.classList.remove("has-alert");
+        }
+
+        function cerrarAnuncios() { document.getElementById("modalAnuncios").style.display = "none"; }
+
+        function normalizarTexto(texto) {
+            if (!texto) return '';
+            return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+        }
+
+        function buscarSoloZipGrade() {
+            const inputRaw = document.getElementById("inputBuscarApellidos").value;
+            const inputApellidos = normalizarTexto(inputRaw);
+            const resultadosDiv = document.getElementById("resultadosCredenciales");
+            if (!inputApellidos) {
+                resultadosDiv.innerHTML =
+                    "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa tu apellido.</p>";
+                return;
+            }
+            const filtrados = window.estudiantesData.filter(est => {
+                if (!est["Last Name"]) return false;
+                const apellidoDB = normalizarTexto(est["Last Name"].toString());
+                return apellidoDB.includes(inputApellidos);
+            });
+            if (filtrados.length === 0) {
+                resultadosDiv.innerHTML =
+                    "<p class='small-note' style='text-align: center; color: #ff4757;'>❌ No se encontraron estudiantes con esos apellidos en nuestra base de datos.</p>";
+                return;
+            }
+            let html =
+                '<div class="stats-grid" style="gap:10px; margin-top:15px; grid-template-columns: 1fr;">';
+            filtrados.forEach(est => {
+                html += `
+                    <div class="stat-box" style="text-align:left; background:rgba(0,0,0,0.3); padding: 15px; border-left: 4px solid #1e90ff;">
+                        <h4 style="color:#1e90ff; margin-bottom:5px; font-size:1.1rem;">${est["First Name"] || ''} ${est["Last Name"] || ''}</h4>
+                        <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Clase:</strong> ${est["Classes"] || 'No asignada'}</p>
+                        <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Tu Código ZipGrade ID es:</strong> <span style="background:rgba(255,255,255,0.1); padding:3px 8px; border-radius:5px; font-family: monospace; font-size: 1.1rem; color: #fff;">${est["ZipGrade ID"]}</span></p>
+                    </div>`;
+            });
+            html += '</div>';
+            document.getElementById("inputBuscarApellidos").value = "";
+            resultadosDiv.innerHTML = html;
+        }
+
+        function buscarContrasena() {
+            const inputZip = document.getElementById("inputZipGrade").value.trim();
+            const inputRawApellido = document.getElementById("inputApellido").value;
+            const inputApellido = normalizarTexto(inputRawApellido);
+            const resultadosDiv = document.getElementById("resultadosCredenciales");
+            if (!inputZip || !inputApellido) {
+                resultadosDiv.innerHTML =
+                    "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa tu Código ZipGrade y tu Apellido para ver la contraseña.</p>";
+                return;
+            }
+            const filtrados = window.estudiantesData.filter(est => {
+                const idCoincide = est["ZipGrade ID"] && est["ZipGrade ID"].toString().trim() ===
+                    inputZip;
+                if (!est["Last Name"]) return false;
+                const apellidoDB = normalizarTexto(est["Last Name"].toString());
+                const apellidoCoincide = apellidoDB.includes(inputApellido);
+                return idCoincide && apellidoCoincide;
+            });
+            if (filtrados.length === 0) {
+                resultadosDiv.innerHTML =
+                    "<p class='small-note' style='text-align: center; color: #ff4757;'>❌ Datos incorrectos. Verifica tu Código ZipGrade y que hayas escrito bien tu apellido.</p>";
+                return;
+            }
+            let html =
+                '<div class="stats-grid" style="gap:10px; margin-top:15px; grid-template-columns: 1fr;">';
+            filtrados.forEach(est => {
+                html += `
+                    <div class="stat-box" style="text-align:left; background:rgba(0,0,0,0.3); padding: 15px; border-left: 4px solid var(--amarillo);">
+                        <h4 style="color:var(--amarillo); margin-bottom:5px; font-size:1.1rem;">${est["First Name"] || ''} ${est["Last Name"] || ''}</h4>
+                        <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Contraseña de Acceso:</strong> <span style="background:var(--verde-claro); padding:3px 8px; border-radius:5px; font-family: monospace; font-size: 1.1rem; color: white;">${est["Access Code"]}</span></p>
+                    </div>`;
+            });
+            html += '</div>';
+            document.getElementById("inputZipGrade").value = "";
+            document.getElementById("inputApellido").value = "";
+            resultadosDiv.innerHTML = html;
+        }
+
+        function logout() {
+            import("https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js").then(({ getAuth, signOut }) => {
+                const auth2 = getAuth();
+                signOut(auth2).then(() => {
+                    cerrarPanel();
+                    document.getElementById("email").value = '';
+                    document.getElementById("password").value = '';
+                }).catch(err => console.error(err));
+            });
+        }
+    </script>
 </body>
 </html>
