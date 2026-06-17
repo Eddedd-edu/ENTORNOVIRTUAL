@@ -402,7 +402,7 @@
             margin: 0;
         }
 
-        /* === ESTILOS ADMIN === */
+        /* ESTILOS ADMIN */
         .admin-tabs {
             display: flex;
             gap: 8px;
@@ -731,10 +731,10 @@
         <p id="headerSubtitulo">I.E.T. San José - Fresno Tolima</p>
     </header>
 
-    <!-- MENÚ DINÁMICO (se renderiza desde configuración) -->
+    <!-- MENÚ DINÁMICO -->
     <div class="menu-grid" id="menuGrid"></div>
 
-    <!-- ===================== MODALES EXISTENTES ===================== -->
+    <!-- MODALES EXISTENTES -->
     <div class="modal" id="modalAnuncios">
         <div class="modal-content" style="max-width: 600px;">
             <div class="close-btn" onclick="cerrarAnuncios()"><i class="fas fa-times"></i></div>
@@ -878,18 +878,19 @@
         </div>
     </div>
 
-    <!-- ===================== MODAL ADMINISTRACIÓN DEL DASHBOARD ===================== -->
+    <!-- MODAL ADMINISTRACIÓN DEL DASHBOARD -->
     <div class="modal" id="modalAdmin">
         <div class="modal-content" style="max-width: 950px;">
             <div class="close-btn" onclick="cerrarAdminDashboard()"><i class="fas fa-times"></i></div>
             <h2><i class="fas fa-cog"></i> Administración del Dashboard</h2>
-            <p class="small-note">Configura los botones del menú principal, anuncios, laboratorios y apariencia. Los cambios se guardan automáticamente en tu navegador.</p>
+            <p class="small-note">Configura los botones del menú principal, anuncios, laboratorios, modales personalizados y apariencia. Los cambios se guardan automáticamente en tu navegador.</p>
 
             <!-- Pestañas -->
             <div class="admin-tabs">
                 <div class="admin-tab active" onclick="switchAdminTab('botones')"><i class="fas fa-th-large"></i> Botones Menú</div>
                 <div class="admin-tab" onclick="switchAdminTab('anuncios')"><i class="fas fa-bullhorn"></i> Anuncios</div>
                 <div class="admin-tab" onclick="switchAdminTab('labs')"><i class="fas fa-flask"></i> Labs / Recursos</div>
+                <div class="admin-tab" onclick="switchAdminTab('modales')"><i class="fas fa-window-maximize"></i> Modales Personalizados</div>
                 <div class="admin-tab" onclick="switchAdminTab('apariencia')"><i class="fas fa-palette"></i> Apariencia</div>
             </div>
 
@@ -901,7 +902,6 @@
                     <span class="small-note" style="margin:0;">Total: <strong id="contadorBotones">0</strong> botones</span>
                 </div>
                 <div id="listaBotonesAdmin"></div>
-                <!-- Vista previa mini -->
                 <h4 style="margin-top:20px; color:#ddd;">📱 Vista Previa del Menú</h4>
                 <div class="preview-mini" id="previewMiniMenu"></div>
             </div>
@@ -929,6 +929,16 @@
                     <button onclick="resetearRecursosExternos()" class="btn-outline btn-sm"><i class="fas fa-undo"></i> Restaurar Recursos</button>
                 </div>
                 <div id="listaRecursosExternosAdmin"></div>
+            </div>
+
+            <!-- TAB: Modales Personalizados -->
+            <div class="admin-tab-content" id="tab-modales">
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                    <button onclick="agregarNuevoModalPersonalizado()" style="background:#2ed573; color:#000;"><i class="fas fa-plus-circle"></i> Crear Modal Personalizado</button>
+                    <button onclick="resetearModalesPersonalizados()" class="btn-outline btn-sm"><i class="fas fa-undo"></i> Eliminar todos</button>
+                </div>
+                <div id="listaModalesPersonalizadosAdmin"></div>
+                <p class="small-note" style="margin-top:10px;">Los modales que crees aquí podrán ser vinculados a los botones del menú principal (seleccionando "Abrir Modal Personalizado" en el editor del botón).</p>
             </div>
 
             <!-- TAB: Apariencia -->
@@ -979,6 +989,7 @@
             <select id="editorBotonTipo" onchange="toggleEditorBotonCampos()">
                 <option value="modal">Abrir Modal Interno</option>
                 <option value="link">Abrir Enlace Externo</option>
+                <option value="customModal">Abrir Modal Personalizado</option>
             </select>
             <div id="editorBotonModalSelect">
                 <label>Modal a Abrir</label>
@@ -994,6 +1005,10 @@
             <div id="editorBotonLinkDiv" style="display:none;">
                 <label>URL / Enlace</label>
                 <input type="url" id="editorBotonLink" placeholder="https://...">
+            </div>
+            <div id="editorBotonCustomModalDiv" style="display:none;">
+                <label>Modal Personalizado</label>
+                <select id="editorBotonCustomModalId"></select>
             </div>
             <label>
                 <input type="checkbox" id="editorBotonAlerta"> Mostrar indicador de alerta (punto rojo)
@@ -1054,14 +1069,32 @@
         </div>
     </div>
 
+    <!-- Modal para editar/crear un modal personalizado -->
+    <div class="modal" id="modalEditorModalPersonalizado">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="close-btn" onclick="cerrarEditorModalPersonalizado()"><i class="fas fa-times"></i></div>
+            <h2 id="editorModalPersonalizadoTitulo">Editar Modal Personalizado</h2>
+            <input type="hidden" id="editorModalPersonalizadoId">
+            <label>Título del Modal</label>
+            <input type="text" id="editorModalPersonalizadoTituloInput" placeholder="Ej: Horario de Clases">
+            <label>Contenido (puedes usar HTML)</label>
+            <textarea id="editorModalPersonalizadoContenido" rows="6" placeholder="<p>Aquí el contenido...</p>"></textarea>
+            <p class="small-note" style="margin-top:-8px;">Puedes incluir texto, enlaces, imágenes, etc.</p>
+            <label>Color del Borde Superior (opcional)</label>
+            <input type="color" id="editorModalPersonalizadoColor" value="#f2b705">
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button onclick="guardarEdicionModalPersonalizado()" style="background:#2ed573; color:#000; flex:1;"><i class="fas fa-check"></i> Guardar Modal</button>
+                <button onclick="cerrarEditorModalPersonalizado()" class="btn-outline" style="flex:1;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <footer>© 2026 I.E.T. San José - Entorno Virtual</footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc } from
-        "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from
-        "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
@@ -1097,8 +1130,7 @@
             respuestas["q1"] = q1.value;
             const recursos = [];
             document.querySelectorAll(".recursos:checked").forEach(cb => recursos.push(cb.value));
-            const data = { establecimiento, jornada, grado, fecha, asignatura, respuestas, recursos,
-            timestamp: new Date() };
+            const data = { establecimiento, jornada, grado, fecha, asignatura, respuestas, recursos, timestamp: new Date() };
             const btnSubmit = document.querySelector(".submit");
             btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
             btnSubmit.disabled = true;
@@ -1152,19 +1184,16 @@
             const gradoFiltro = document.getElementById("filtroGrado").value;
             const asignaturaFiltro = document.getElementById("filtroAsignatura").value;
             window.datosFiltrados = datosGlobal.filter(d => {
-                return (gradoFiltro === "" || d.grado === gradoFiltro) && (asignaturaFiltro === "" || d
-                    .asignatura === asignaturaFiltro);
+                return (gradoFiltro === "" || d.grado === gradoFiltro) && (asignaturaFiltro === "" || d.asignatura === asignaturaFiltro);
             });
             document.getElementById("totalEncuestas").innerText = window.datosFiltrados.length;
             let conteo = { Nunca: 0, "Algunas veces": 0, "Casi siempre": 0, Siempre: 0 };
-            let suma = 0,
-                totalRespuestas = 0;
+            let suma = 0, totalRespuestas = 0;
             window.datosFiltrados.forEach(d => {
                 const respObj = d.respuestas || {};
                 Object.values(respObj).forEach(r => {
                     if (conteo.hasOwnProperty(r)) conteo[r]++;
-                    suma += (r === "Nunca" ? 1 : r === "Algunas veces" ? 2 : r === "Casi siempre" ? 3 :
-                        r === "Siempre" ? 4 : 0);
+                    suma += (r === "Nunca" ? 1 : r === "Algunas veces" ? 2 : r === "Casi siempre" ? 3 : r === "Siempre" ? 4 : 0);
                     if (r !== "Sí" && r !== "No") totalRespuestas++;
                 });
             });
@@ -1214,12 +1243,9 @@
         }
 
         window.exportarExcel = function() {
-            if (!window.datosFiltrados || window.datosFiltrados.length === 0) { alert(
-                    "No hay datos para exportar."); return; }
+            if (!window.datosFiltrados || window.datosFiltrados.length === 0) { alert("No hay datos para exportar."); return; }
             const datosExcel = window.datosFiltrados.map(d => {
-                let fila = { Establecimiento: d.establecimiento, Jornada: d.jornada, Grado: d.grado,
-                    Asignatura: d.asignatura, Fecha: d.fecha, "P1_Entregó_Programa": d.respuestas?.q1 ||
-                        '' };
+                let fila = { Establecimiento: d.establecimiento, Jornada: d.jornada, Grado: d.grado, Asignatura: d.asignatura, Fecha: d.fecha, "P1_Entregó_Programa": d.respuestas?.q1 || '' };
                 for (let i = 2; i <= 19; i++) { fila[`Pregunta_${i}`] = d.respuestas?.[`q${i}`] || ''; }
                 fila.Recursos_Usados = d.recursos ? d.recursos.join(', ') : '';
                 return fila;
@@ -1231,8 +1257,7 @@
         };
 
         window.exportarPDF = async function() {
-            if (!window.datosFiltrados || window.datosFiltrados.length === 0) { alert(
-                    "No hay datos para generar el informe."); return; }
+            if (!window.datosFiltrados || window.datosFiltrados.length === 0) { alert("No hay datos para generar el informe."); return; }
             const btnPdf = document.querySelector('.btn-pdf');
             const originalText = btnPdf.innerHTML;
             btnPdf.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando Informe...';
@@ -1251,117 +1276,58 @@
                     if (d.respuestas?.q1 === "Sí") q1Si++;
                     for (let i = 2; i <= 19; i++) {
                         let val = d.respuestas?.[`q${i}`];
-                        let num = val === "Nunca" ? 1 : val === "Algunas veces" ? 2 : val ===
-                            "Casi siempre" ? 3 : val === "Siempre" ? 4 : 0;
+                        let num = val === "Nunca" ? 1 : val === "Algunas veces" ? 2 : val === "Casi siempre" ? 3 : val === "Siempre" ? 4 : 0;
                         sumasPorPregunta[`q${i}`] += num;
                     }
-                    if (d.recursos) { d.recursos.forEach(r => { conteoRecursos[r] = (conteoRecursos[r] ||
-                                0) + 1; }); }
+                    if (d.recursos) { d.recursos.forEach(r => { conteoRecursos[r] = (conteoRecursos[r] || 0) + 1; }); }
                 });
                 let q1Porcentaje = ((q1Si / total) * 100).toFixed(1);
                 let promediosPreguntas = [];
-                for (let i = 2; i <= 19; i++) { promediosPreguntas.push({ num: i, texto: window
-                        .listaPreguntas[i - 2], promedio: total > 0 ? (sumasPorPregunta[`q${i}`] /
-                        total) : 0 }); }
+                for (let i = 2; i <= 19; i++) { promediosPreguntas.push({ num: i, texto: window.listaPreguntas[i - 2], promedio: total > 0 ? (sumasPorPregunta[`q${i}`] / total) : 0 }); }
                 promediosPreguntas.sort((a, b) => b.promedio - a.promedio);
                 let fortalezas = promediosPreguntas.slice(0, 2);
                 let mejoras = promediosPreguntas.slice(-2).reverse();
                 let recursosOrdenados = Object.entries(conteoRecursos).sort((a, b) => b[1] - a[1]);
-                pdf.setFont("helvetica", "bold");
-                pdf.setFontSize(18);
-                pdf.setTextColor(15, 61, 30);
-                pdf.text("INFORME DE EVALUACIÓN DOCENTE", pageWidth / 2, y, { align: "center" });
-                y += 8;
-                pdf.setFont("helvetica", "normal");
-                pdf.setFontSize(11);
-                pdf.setTextColor(50, 50, 50);
+                pdf.setFont("helvetica", "bold"); pdf.setFontSize(18); pdf.setTextColor(15, 61, 30);
+                pdf.text("INFORME DE EVALUACIÓN DOCENTE", pageWidth / 2, y, { align: "center" }); y += 8;
+                pdf.setFont("helvetica", "normal"); pdf.setFontSize(11); pdf.setTextColor(50, 50, 50);
                 const grado = document.getElementById("filtroGrado").value || 'Todos los grados';
                 const asig = document.getElementById("filtroAsignatura").value || 'Todas las asignaturas';
-                pdf.text(`Institución Educativa Técnica San José`, pageWidth / 2, y, { align: "center" });
-                y += 6;
-                pdf.text(`Filtro aplicado: ${grado} | ${asig}`, pageWidth / 2, y, { align: "center" });
-                y += 15;
-                pdf.setFont("helvetica", "bold");
-                pdf.setFontSize(14);
-                pdf.setTextColor(0, 0, 0);
-                pdf.text("1. Resumen Cuantitativo", 15, y);
-                y += 8;
+                pdf.text(`Institución Educativa Técnica San José`, pageWidth / 2, y, { align: "center" }); y += 6;
+                pdf.text(`Filtro aplicado: ${grado} | ${asig}`, pageWidth / 2, y, { align: "center" }); y += 15;
+                pdf.setFont("helvetica", "bold"); pdf.setFontSize(14); pdf.setTextColor(0, 0, 0);
+                pdf.text("1. Resumen Cuantitativo", 15, y); y += 8;
+                pdf.setFont("helvetica", "normal"); pdf.setFontSize(11);
+                pdf.text(`• Total de encuestas analizadas: ${total}`, 15, y); y += 6;
+                pdf.text(`• Promedio General (Escala 1 a 4): ${document.getElementById("promedioGeneral").innerText}`, 15, y); y += 6;
+                pdf.text(`• El ${q1Porcentaje}% de los estudiantes afirma que se entregó el programa al inicio.`, 15, y); y += 12;
+                pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
+                pdf.text("2. Análisis Descriptivo", 15, y); y += 8;
+                pdf.setFont("helvetica", "bold"); pdf.setFontSize(11); pdf.setTextColor(26, 107, 53);
+                pdf.text("Principales Fortalezas (Mejores promedios):", 15, y); y += 6;
+                pdf.setFont("helvetica", "normal"); pdf.setTextColor(50, 50, 50);
+                fortalezas.forEach(f => { let texto = `• P${f.num}: ${f.texto} (Promedio: ${f.promedio.toFixed(2)})`; let lineas = pdf.splitTextToSize(texto, pageWidth - 30); pdf.text(lineas, 15, y); y += lineas.length * 5; }); y += 4;
+                pdf.setFont("helvetica", "bold"); pdf.setTextColor(200, 50, 50);
+                pdf.text("Oportunidades de Mejora (Promedios más bajos):", 15, y); y += 6;
+                pdf.setFont("helvetica", "normal"); pdf.setTextColor(50, 50, 50);
+                mejoras.forEach(m => { let texto = `• P${m.num}: ${m.texto} (Promedio: ${m.promedio.toFixed(2)})`; let lineas = pdf.splitTextToSize(texto, pageWidth - 30); pdf.text(lineas, 15, y); y += lineas.length * 5; }); y += 4;
+                pdf.setFont("helvetica", "bold"); pdf.setTextColor(0, 0, 0);
+                pdf.text("Recursos Didácticos más utilizados:", 15, y); y += 6;
                 pdf.setFont("helvetica", "normal");
-                pdf.setFontSize(11);
-                pdf.text(`• Total de encuestas analizadas: ${total}`, 15, y);
-                y += 6;
-                pdf.text(
-                    `• Promedio General (Escala 1 a 4): ${document.getElementById("promedioGeneral").innerText}`,
-                    15, y);
-                y += 6;
-                pdf.text(
-                    `• El ${q1Porcentaje}% de los estudiantes afirma que se entregó el programa al inicio.`,
-                    15, y);
-                y += 12;
-                pdf.setFont("helvetica", "bold");
-                pdf.setFontSize(14);
-                pdf.text("2. Análisis Descriptivo", 15, y);
-                y += 8;
-                pdf.setFont("helvetica", "bold");
-                pdf.setFontSize(11);
-                pdf.setTextColor(26, 107, 53);
-                pdf.text("Principales Fortalezas (Mejores promedios):", 15, y);
-                y += 6;
-                pdf.setFont("helvetica", "normal");
-                pdf.setTextColor(50, 50, 50);
-                fortalezas.forEach(f => {
-                    let texto =
-                        `• P${f.num}: ${f.texto} (Promedio: ${f.promedio.toFixed(2)})`;
-                    let lineas = pdf.splitTextToSize(texto, pageWidth - 30);
-                    pdf.text(lineas, 15, y);
-                    y += lineas.length * 5;
-                });
-                y += 4;
-                pdf.setFont("helvetica", "bold");
-                pdf.setTextColor(200, 50, 50);
-                pdf.text("Oportunidades de Mejora (Promedios más bajos):", 15, y);
-                y += 6;
-                pdf.setFont("helvetica", "normal");
-                pdf.setTextColor(50, 50, 50);
-                mejoras.forEach(m => {
-                    let texto =
-                        `• P${m.num}: ${m.texto} (Promedio: ${m.promedio.toFixed(2)})`;
-                    let lineas = pdf.splitTextToSize(texto, pageWidth - 30);
-                    pdf.text(lineas, 15, y);
-                    y += lineas.length * 5;
-                });
-                y += 4;
-                pdf.setFont("helvetica", "bold");
-                pdf.setTextColor(0, 0, 0);
-                pdf.text("Recursos Didácticos más utilizados:", 15, y);
-                y += 6;
-                pdf.setFont("helvetica", "normal");
-                if (recursosOrdenados.length > 0) {
-                    recursosOrdenados.slice(0, 3).forEach(r => { pdf.text(
-                            `• ${r[0]} (${r[1]} menciones)`, 15, y);
-                        y += 6; });
-                } else { pdf.text("• No se registraron recursos en estas encuestas.", 15, y);
-                    y += 6; }
-                y += 10;
-                pdf.setFont("helvetica", "bold");
-                pdf.setFontSize(14);
-                pdf.text("3. Gráfico de Frecuencia de Respuestas", 15, y);
-                y += 5;
+                if (recursosOrdenados.length > 0) { recursosOrdenados.slice(0, 3).forEach(r => { pdf.text(`• ${r[0]} (${r[1]} menciones)`, 15, y); y += 6; }); } else { pdf.text("• No se registraron recursos en estas encuestas.", 15, y); y += 6; } y += 10;
+                pdf.setFont("helvetica", "bold"); pdf.setFontSize(14);
+                pdf.text("3. Gráfico de Frecuencia de Respuestas", 15, y); y += 5;
                 const elemento = document.getElementById("graficoGeneral");
                 const canvas = await html2canvas(elemento, { scale: 2, backgroundColor: "#1a6b35" });
                 const imgData = canvas.toDataURL('image/png');
                 const imgWidth = pageWidth - 30;
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                if (y + imgHeight > pdf.internal.pageSize.getHeight() - 15) { pdf.addPage();
-                    y = 20; }
+                if (y + imgHeight > pdf.internal.pageSize.getHeight() - 15) { pdf.addPage(); y = 20; }
                 pdf.addImage(imgData, 'PNG', 15, y, imgWidth, imgHeight);
                 let nombreArchivo = `Informe_Evaluacion_${grado}_${asig}.pdf`.replace(/ /g, "_");
                 pdf.save(nombreArchivo);
-            } catch (err) {
-                console.error("Error al exportar PDF: ", err);
-                alert("Ocurrió un error al generar el PDF.");
-            } finally { btnPdf.innerHTML = originalText;
-                btnPdf.disabled = false; }
+            } catch (err) { console.error("Error al exportar PDF: ", err); alert("Ocurrió un error al generar el PDF."); }
+            finally { btnPdf.innerHTML = originalText; btnPdf.disabled = false; }
         };
         window.cargarDatos = window.cargarDatos || window.cargarDatos;
     </script>
@@ -1370,9 +1336,8 @@
         /* ============================================
            SISTEMA DE CONFIGURACIÓN DEL DASHBOARD
            ============================================ */
-        const STORAGE_KEY = 'dashboard_config_sanjose_v2';
+        const STORAGE_KEY = 'dashboard_config_sanjose_v3';
 
-        // Configuración predeterminada
         function getDefaultConfig() {
             return {
                 header: {
@@ -1386,72 +1351,35 @@
                     amarillo: '#f2b705'
                 },
                 botones: [
-                    { id: 1, icono: 'fas fa-flask', titulo: 'Laboratorio Virtual SJ',
-                        descripcion: 'Haz click para elegir laboratorio', tipo: 'modal', modalId: 'modalLabs',
-                        link: '', alerta: false },
-                    { id: 2, icono: 'fas fa-folder-open', titulo: 'Material de Apoyo',
-                        descripcion: 'Guías, talleres y documentos', tipo: 'link', modalId: '', link: 'https://sedtolimaedu-my.sharepoint.com/:f:/g/personal/edison_avendano_sedtolima_edu_co/IgDYigqdoVH1TZ2j4l1sqdAAAaDbR27cLJJhdXkSb4yQRKY?e=1c3Fdl',
-                        alerta: false },
-                    { id: 3, icono: 'fas fa-globe', titulo: 'Recursos Externos',
-                        descripcion: 'Simulaciones y herramientas', tipo: 'modal', modalId: 'modalRecursosExternos',
-                        link: '', alerta: false },
-                    { id: 4, icono: 'fas fa-bullhorn', titulo: 'Tablero de Anuncios',
-                        descripcion: 'Novedades y recordatorios', tipo: 'modal', modalId: 'modalAnuncios', link: '',
-                        alerta: true },
-                    { id: 5, icono: 'fas fa-id-card', titulo: 'Consultar Credenciales',
-                        descripcion: 'Busca tu código y contraseña', tipo: 'modal', modalId: 'modalCredenciales',
-                        link: '', alerta: false },
-                    { id: 6, icono: 'fas fa-tasks', titulo: 'Quizzes', descripcion: 'Plataforma de pruebas',
-                        tipo: 'link', modalId: '', link: 'https://eddedd-edu.github.io/quizzes/#', alerta: false },
-                    { id: 7, icono: 'fas fa-check-circle', titulo: 'Evaluación Docente',
-                        descripcion: 'ZipGrade', tipo: 'link', modalId: '', link: 'https://www.zipgrade.com/s/',
-                        alerta: false },
-                    { id: 8, icono: 'fas fa-clipboard-list', titulo: 'Encuesta Estudiantes',
-                        descripcion: 'Evaluación anual (MEN)', tipo: 'modal', modalId: 'modalEncuesta', link: '',
-                        alerta: false },
-                    { id: 9, icono: 'fas fa-chart-pie', titulo: 'Panel Estadístico',
-                        descripcion: 'Acceso restringido', tipo: 'modal', modalId: 'modalLogin', link: '',
-                    alerta: false }
+                    { id: 1, icono: 'fas fa-flask', titulo: 'Laboratorio Virtual SJ', descripcion: 'Haz click para elegir laboratorio', tipo: 'modal', modalId: 'modalLabs', link: '', customModalId: null, alerta: false },
+                    { id: 2, icono: 'fas fa-folder-open', titulo: 'Material de Apoyo', descripcion: 'Guías, talleres y documentos', tipo: 'link', modalId: '', link: 'https://sedtolimaedu-my.sharepoint.com/:f:/g/personal/edison_avendano_sedtolima_edu_co/IgDYigqdoVH1TZ2j4l1sqdAAAaDbR27cLJJhdXkSb4yQRKY?e=1c3Fdl', customModalId: null, alerta: false },
+                    { id: 3, icono: 'fas fa-globe', titulo: 'Recursos Externos', descripcion: 'Simulaciones y herramientas', tipo: 'modal', modalId: 'modalRecursosExternos', link: '', customModalId: null, alerta: false },
+                    { id: 4, icono: 'fas fa-bullhorn', titulo: 'Tablero de Anuncios', descripcion: 'Novedades y recordatorios', tipo: 'modal', modalId: 'modalAnuncios', link: '', customModalId: null, alerta: true },
+                    { id: 5, icono: 'fas fa-id-card', titulo: 'Consultar Credenciales', descripcion: 'Busca tu código y contraseña', tipo: 'modal', modalId: 'modalCredenciales', link: '', customModalId: null, alerta: false },
+                    { id: 6, icono: 'fas fa-tasks', titulo: 'Quizzes', descripcion: 'Plataforma de pruebas', tipo: 'link', modalId: '', link: 'https://eddedd-edu.github.io/quizzes/#', customModalId: null, alerta: false },
+                    { id: 7, icono: 'fas fa-check-circle', titulo: 'Evaluación Docente', descripcion: 'ZipGrade', tipo: 'link', modalId: '', link: 'https://www.zipgrade.com/s/', customModalId: null, alerta: false },
+                    { id: 8, icono: 'fas fa-clipboard-list', titulo: 'Encuesta Estudiantes', descripcion: 'Evaluación anual (MEN)', tipo: 'modal', modalId: 'modalEncuesta', link: '', customModalId: null, alerta: false },
+                    { id: 9, icono: 'fas fa-chart-pie', titulo: 'Panel Estadístico', descripcion: 'Acceso restringido', tipo: 'modal', modalId: 'modalLogin', link: '', customModalId: null, alerta: false }
                 ],
                 anuncios: [
-                    { id: 1, titulo: '¡Nuevo Laboratorio: CarbonoQuest PRO!',
-                        contenido: 'Ya puedes acceder al entorno virtual de Química Orgánica. Explora las propiedades del átomo de carbono, tipos de fórmulas y supera el reto de síntesis.',
-                        color: '#2ed573', link: 'https://eddedd-edu.github.io/Carbonquest/',
-                        btnTexto: 'Ingresar al Laboratorio', etiqueta: '¡Nuevo Recurso!' },
-                    { id: 2, titulo: '¡Bienvenidos al Entorno Virtual!',
-                        contenido: 'Ya pueden consultar sus contraseñas en la sección "Consultar Credenciales". Recuerden que necesitarán su Código ZipGrade y su Apellido para ingresar.',
-                        color: '#f2b705', link: '', btnTexto: '', etiqueta: 'Publicado recientemente' },
-                    { id: 3, titulo: 'Nuevo Material Disponible',
-                        contenido: 'Se ha subido la guía de estudio para esta semana en la carpeta de <strong>Material de Apoyo</strong>. Por favor, revísenla antes de la próxima clase.',
-                        color: '#20c997', link: '', btnTexto: '', etiqueta: 'Recordatorio' },
-                    { id: 4, titulo: '¡Nuevo Desafío: ScapeRoom!',
-                        contenido: 'Pon a prueba tus conocimientos químicos para lograr escapar de nuestro laboratorio secreto. ¿Aceptas el reto?',
-                        color: '#ff4757', link: 'https://eddedd-edu.github.io/scapeRoom/',
-                        btnTexto: 'Entrar al ScapeRoom', etiqueta: '¡Nuevo Evento!' }
+                    { id: 1, titulo: '¡Nuevo Laboratorio: CarbonoQuest PRO!', contenido: 'Ya puedes acceder al entorno virtual de Química Orgánica. Explora las propiedades del átomo de carbono, tipos de fórmulas y supera el reto de síntesis.', color: '#2ed573', link: 'https://eddedd-edu.github.io/Carbonquest/', btnTexto: 'Ingresar al Laboratorio', etiqueta: '¡Nuevo Recurso!' },
+                    { id: 2, titulo: '¡Bienvenidos al Entorno Virtual!', contenido: 'Ya pueden consultar sus contraseñas en la sección "Consultar Credenciales". Recuerden que necesitarán su Código ZipGrade y su Apellido para ingresar.', color: '#f2b705', link: '', btnTexto: '', etiqueta: 'Publicado recientemente' },
+                    { id: 3, titulo: 'Nuevo Material Disponible', contenido: 'Se ha subido la guía de estudio para esta semana en la carpeta de <strong>Material de Apoyo</strong>. Por favor, revísenla antes de la próxima clase.', color: '#20c997', link: '', btnTexto: '', etiqueta: 'Recordatorio' },
+                    { id: 4, titulo: '¡Nuevo Desafío: ScapeRoom!', contenido: 'Pon a prueba tus conocimientos químicos para lograr escapar de nuestro laboratorio secreto. ¿Aceptas el reto?', color: '#ff4757', link: 'https://eddedd-edu.github.io/scapeRoom/', btnTexto: 'Entrar al ScapeRoom', etiqueta: '¡Nuevo Evento!' }
                 ],
                 labs: [
-                    { id: 1, titulo: 'Tabla Periódica', descripcion: 'Explora los elementos químicos',
-                        icono: 'fas fa-table', link: 'https://eddedd-edu.github.io/TABLAPER/',
-                    colorIcono: '' },
-                    { id: 2, titulo: 'Leyes de los Gases', descripcion: '', icono: 'fas fa-wind',
-                        link: 'https://eddedd-edu.github.io/Lab-LeyesGas/', colorIcono: '' },
-                    { id: 3, titulo: 'Laboratorio del Átomo', descripcion: '', icono: 'fas fa-atom',
-                        link: 'https://eddedd-edu.github.io/Lab-Atomo/', colorIcono: '' },
-                    { id: 4, titulo: 'Laboratorio de Enlaces', descripcion: '', icono: 'fas fa-project-diagram',
-                        link: 'https://eddedd-edu.github.io/Lab-Enlaces/', colorIcono: '' },
-                    { id: 5, titulo: 'CarbonoQuest PRO', descripcion: 'Química Orgánica', icono: 'fas fa-flask',
-                        link: 'https://eddedd-edu.github.io/Carbonquest/', colorIcono: '#2ed573' },
-                    { id: 6, titulo: 'ScapeRoom', descripcion: 'Reto de Escape', icono: 'fas fa-door-closed',
-                        link: 'https://eddedd-edu.github.io/scapeRoom/', colorIcono: '#ff4757' }
+                    { id: 1, titulo: 'Tabla Periódica', descripcion: 'Explora los elementos químicos', icono: 'fas fa-table', link: 'https://eddedd-edu.github.io/TABLAPER/', colorIcono: '' },
+                    { id: 2, titulo: 'Leyes de los Gases', descripcion: '', icono: 'fas fa-wind', link: 'https://eddedd-edu.github.io/Lab-LeyesGas/', colorIcono: '' },
+                    { id: 3, titulo: 'Laboratorio del Átomo', descripcion: '', icono: 'fas fa-atom', link: 'https://eddedd-edu.github.io/Lab-Atomo/', colorIcono: '' },
+                    { id: 4, titulo: 'Laboratorio de Enlaces', descripcion: '', icono: 'fas fa-project-diagram', link: 'https://eddedd-edu.github.io/Lab-Enlaces/', colorIcono: '' },
+                    { id: 5, titulo: 'CarbonoQuest PRO', descripcion: 'Química Orgánica', icono: 'fas fa-flask', link: 'https://eddedd-edu.github.io/Carbonquest/', colorIcono: '#2ed573' },
+                    { id: 6, titulo: 'ScapeRoom', descripcion: 'Reto de Escape', icono: 'fas fa-door-closed', link: 'https://eddedd-edu.github.io/scapeRoom/', colorIcono: '#ff4757' }
                 ],
                 recursosExternos: [
-                    { id: 1, titulo: 'Simulaciones PhET', descripcion: 'Simulaciones interactivas de Química',
-                        icono: 'fas fa-laptop-code',
-                        link: 'https://phet.colorado.edu/es/simulations/filter?subjects=chemistry&type=html',
-                        colorIcono: '' },
-                    { id: 2, titulo: 'Tabla Periódica Dinámica', descripcion: 'Ptable - Propiedades y elementos',
-                        icono: 'fas fa-table', link: 'https://ptable.com/?lang=es#', colorIcono: '' }
-                ]
+                    { id: 1, titulo: 'Simulaciones PhET', descripcion: 'Simulaciones interactivas de Química', icono: 'fas fa-laptop-code', link: 'https://phet.colorado.edu/es/simulations/filter?subjects=chemistry&type=html', colorIcono: '' },
+                    { id: 2, titulo: 'Tabla Periódica Dinámica', descripcion: 'Ptable - Propiedades y elementos', icono: 'fas fa-table', link: 'https://ptable.com/?lang=es#', colorIcono: '' }
+                ],
+                customModals: []
             };
         }
 
@@ -1462,9 +1390,7 @@
                     const parsed = JSON.parse(guardado);
                     return mergeConfig(getDefaultConfig(), parsed);
                 }
-            } catch (e) {
-                console.warn('Error al cargar configuración, usando predeterminada.', e);
-            }
+            } catch (e) { console.warn('Error al cargar configuración, usando predeterminada.', e); }
             return getDefaultConfig();
         }
 
@@ -1475,8 +1401,8 @@
             if (saved.botones && Array.isArray(saved.botones)) merged.botones = saved.botones;
             if (saved.anuncios && Array.isArray(saved.anuncios)) merged.anuncios = saved.anuncios;
             if (saved.labs && Array.isArray(saved.labs)) merged.labs = saved.labs;
-            if (saved.recursosExternos && Array.isArray(saved.recursosExternos)) merged.recursosExternos = saved
-                .recursosExternos;
+            if (saved.recursosExternos && Array.isArray(saved.recursosExternos)) merged.recursosExternos = saved.recursosExternos;
+            if (saved.customModals && Array.isArray(saved.customModals)) merged.customModals = saved.customModals;
             return merged;
         }
 
@@ -1507,10 +1433,7 @@
                 card.className = 'menu-card';
                 if (btn.alerta) card.classList.add('has-alert');
                 card.setAttribute('data-id', btn.id);
-                card.innerHTML = `
-                    <i class="${btn.icono}"></i>
-                    <h3>${btn.titulo}</h3>
-                    <p>${btn.descripcion}</p>`;
+                card.innerHTML = `<i class="${btn.icono}"></i><h3>${btn.titulo}</h3><p>${btn.descripcion}</p>`;
                 card.addEventListener('click', () => ejecutarAccionBoton(btn));
                 grid.appendChild(card);
             });
@@ -1528,9 +1451,9 @@
                     'modalLogin': abrirLogin,
                     'modalRecursosExternos': abrirRecursosExternos
                 };
-                if (modalMap[btn.modalId]) {
-                    modalMap[btn.modalId]();
-                }
+                if (modalMap[btn.modalId]) modalMap[btn.modalId]();
+            } else if (btn.tipo === 'customModal' && btn.customModalId) {
+                abrirModalPersonalizado(btn.customModalId);
             }
         }
 
@@ -1540,23 +1463,11 @@
             container.innerHTML = '';
             dashboardConfig.anuncios.forEach(an => {
                 const div = document.createElement('div');
-                div.style.cssText = `
-                    background: rgba(0,0,0,0.2);
-                    border-left: 4px solid ${an.color};
-                    padding: 15px;
-                    border-radius: 8px;
-                `;
+                div.style.cssText = `background: rgba(0,0,0,0.2); border-left: 4px solid ${an.color}; padding: 15px; border-radius: 8px;`;
                 let html = `<h4 style="color: ${an.color}; margin-bottom: 5px;">${an.titulo}</h4>`;
-                html +=
-                    `<p style="font-size: 0.95rem; margin-bottom: 5px;">${an.contenido}</p>`;
-                if (an.link && an.btnTexto) {
-                    html +=
-                        `<a href="${an.link}" target="_blank" style="display:inline-block; margin-top:8px; padding:8px 15px; background:${an.color}; color:#000; text-decoration:none; border-radius:8px; font-weight:bold; font-size:0.9rem;">${an.btnTexto}</a><br>`;
-                }
-                if (an.etiqueta) {
-                    html +=
-                        `<span style="font-size: 0.8rem; opacity: 0.6; margin-top:10px; display:inline-block;"><i class="far fa-calendar-alt"></i> ${an.etiqueta}</span>`;
-                }
+                html += `<p style="font-size: 0.95rem; margin-bottom: 5px;">${an.contenido}</p>`;
+                if (an.link && an.btnTexto) html += `<a href="${an.link}" target="_blank" style="display:inline-block; margin-top:8px; padding:8px 15px; background:${an.color}; color:#000; text-decoration:none; border-radius:8px; font-weight:bold; font-size:0.9rem;">${an.btnTexto}</a><br>`;
+                if (an.etiqueta) html += `<span style="font-size: 0.8rem; opacity: 0.6; margin-top:10px; display:inline-block;"><i class="far fa-calendar-alt"></i> ${an.etiqueta}</span>`;
                 div.innerHTML = html;
                 container.appendChild(div);
             });
@@ -1571,10 +1482,7 @@
                 card.className = 'menu-card';
                 card.style.padding = '20px';
                 if (lab.colorIcono) card.style.borderColor = lab.colorIcono;
-                card.innerHTML = `
-                    <i class="${lab.icono}" style="${lab.colorIcono ? 'color:' + lab.colorIcono : ''}"></i>
-                    <h3 style="${lab.colorIcono ? 'color:' + lab.colorIcono : ''}">${lab.titulo}</h3>
-                    ${lab.descripcion ? '<p>' + lab.descripcion + '</p>' : ''}`;
+                card.innerHTML = `<i class="${lab.icono}" style="${lab.colorIcono ? 'color:' + lab.colorIcono : ''}"></i><h3 style="${lab.colorIcono ? 'color:' + lab.colorIcono : ''}">${lab.titulo}</h3>${lab.descripcion ? '<p>' + lab.descripcion + '</p>' : ''}`;
                 card.addEventListener('click', () => window.open(lab.link, '_blank'));
                 container.appendChild(card);
             });
@@ -1588,13 +1496,39 @@
                 const card = document.createElement('div');
                 card.className = 'menu-card';
                 card.style.padding = '20px';
-                card.innerHTML = `
-                    <i class="${rec.icono}"></i>
-                    <h3>${rec.titulo}</h3>
-                    ${rec.descripcion ? '<p>' + rec.descripcion + '</p>' : ''}`;
+                card.innerHTML = `<i class="${rec.icono}"></i><h3>${rec.titulo}</h3>${rec.descripcion ? '<p>' + rec.descripcion + '</p>' : ''}`;
                 card.addEventListener('click', () => window.open(rec.link, '_blank'));
                 container.appendChild(card);
             });
+        }
+
+        // ==================== RENDERIZADO DE MODALES PERSONALIZADOS ====================
+        function renderizarCustomModals() {
+            // Eliminar modales personalizados antiguos
+            document.querySelectorAll('.modal-custom').forEach(el => el.remove());
+            dashboardConfig.customModals.forEach(modal => {
+                const modalDiv = document.createElement('div');
+                modalDiv.className = 'modal modal-custom';
+                modalDiv.id = `modalCustom_${modal.id}`;
+                modalDiv.innerHTML = `
+                    <div class="modal-content" style="max-width:600px; border-top: 5px solid ${modal.color || '#f2b705'};">
+                        <div class="close-btn" onclick="cerrarModalPersonalizado(${modal.id})"><i class="fas fa-times"></i></div>
+                        <h2>${modal.titulo}</h2>
+                        <div>${modal.contenido}</div>
+                    </div>`;
+                document.body.appendChild(modalDiv);
+            });
+        }
+
+        function abrirModalPersonalizado(id) {
+            const modal = document.getElementById(`modalCustom_${id}`);
+            if (modal) modal.style.display = 'flex';
+            else alert('Modal personalizado no encontrado.');
+        }
+
+        function cerrarModalPersonalizado(id) {
+            const modal = document.getElementById(`modalCustom_${id}`);
+            if (modal) modal.style.display = 'none';
         }
 
         // Renderizado inicial
@@ -1602,6 +1536,7 @@
         renderizarAnuncios();
         renderizarLabs();
         renderizarRecursosExternos();
+        renderizarCustomModals();
 
         // ==================== ADMIN: ABRIR/CERRAR ====================
         function abrirAdminDashboard() {
@@ -1610,6 +1545,7 @@
             refrescarListaAnunciosAdmin();
             refrescarListaLabsAdmin();
             refrescarListaRecursosExternosAdmin();
+            refrescarListaModalesPersonalizadosAdmin();
             cargarCamposApariencia();
             switchAdminTab('botones');
         }
@@ -1625,15 +1561,10 @@
             if (tabBtn) tabBtn.classList.add('active');
             const tabContent = document.getElementById('tab-' + tab);
             if (tabContent) tabContent.classList.add('active');
-            if (tab === 'botones') {
-                refrescarListaBotonesAdmin();
-                refrescarPreviewMini();
-            }
+            if (tab === 'botones') { refrescarListaBotonesAdmin(); refrescarPreviewMini(); }
             if (tab === 'anuncios') refrescarListaAnunciosAdmin();
-            if (tab === 'labs') {
-                refrescarListaLabsAdmin();
-                refrescarListaRecursosExternosAdmin();
-            }
+            if (tab === 'labs') { refrescarListaLabsAdmin(); refrescarListaRecursosExternosAdmin(); }
+            if (tab === 'modales') refrescarListaModalesPersonalizadosAdmin();
             if (tab === 'apariencia') cargarCamposApariencia();
         }
 
@@ -1646,7 +1577,7 @@
                     <div class="btn-icon-preview"><i class="${btn.icono}"></i></div>
                     <div class="btn-info">
                         <strong>${btn.titulo}</strong>
-                        <small>${btn.descripcion} &nbsp;|&nbsp; <span class="badge ${btn.tipo === 'modal' ? 'badge-modal' : 'badge-link'}">${btn.tipo === 'modal' ? 'Modal: ' + btn.modalId : 'Enlace'}</span> ${btn.alerta ? '<span class="badge badge-alert">Alerta</span>' : ''}</small>
+                        <small>${btn.descripcion} &nbsp;|&nbsp; <span class="badge ${btn.tipo === 'modal' ? 'badge-modal' : btn.tipo === 'link' ? 'badge-link' : 'badge-alert'}">${btn.tipo === 'modal' ? 'Modal: ' + btn.modalId : btn.tipo === 'link' ? 'Enlace' : 'Modal Personalizado'}</span> ${btn.alerta ? '<span class="badge badge-alert">Alerta</span>' : ''}</small>
                     </div>
                     <div class="btn-actions">
                         <button class="btn-sm btn-outline" onclick="editarBoton(${btn.id})"><i class="fas fa-edit"></i></button>
@@ -1661,20 +1592,13 @@
 
         function refrescarPreviewMini() {
             const preview = document.getElementById('previewMiniMenu');
-            preview.innerHTML = dashboardConfig.botones.map(btn => `
-                <div class="mini-card">
-                    <i class="${btn.icono}"></i>
-                    <strong>${btn.titulo.substring(0, 20)}</strong>
-                </div>
-            `).join('');
+            preview.innerHTML = dashboardConfig.botones.map(btn => `<div class="mini-card"><i class="${btn.icono}"></i><strong>${btn.titulo.substring(0, 20)}</strong></div>`).join('');
         }
 
         function moverBoton(index, direccion) {
             const newIndex = index + direccion;
             if (newIndex < 0 || newIndex >= dashboardConfig.botones.length) return;
-            const temp = dashboardConfig.botones[index];
-            dashboardConfig.botones[index] = dashboardConfig.botones[newIndex];
-            dashboardConfig.botones[newIndex] = temp;
+            [dashboardConfig.botones[index], dashboardConfig.botones[newIndex]] = [dashboardConfig.botones[newIndex], dashboardConfig.botones[index]];
             guardarConfiguracion(dashboardConfig);
             refrescarListaBotonesAdmin();
             renderizarMenu();
@@ -1713,11 +1637,14 @@
             document.getElementById('editorBotonTituloInput').value = btn.titulo;
             document.getElementById('editorBotonDesc').value = btn.descripcion;
             document.getElementById('editorBotonIcono').value = btn.icono;
-            document.getElementById('editorBotonTipo').value = btn.tipo;
+            document.getElementById('editorBotonTipo').value = btn.tipo || 'modal';
             document.getElementById('editorBotonModalId').value = btn.modalId || 'modalLabs';
             document.getElementById('editorBotonLink').value = btn.link || '';
-            document.getElementById('editorBotonAlerta').checked = btn.alerta;
+            document.getElementById('editorBotonAlerta').checked = btn.alerta || false;
             toggleEditorBotonCampos();
+            if (btn.tipo === 'customModal') {
+                cargarOpcionesCustomModalsBotonEditor(btn.customModalId);
+            }
             document.getElementById('modalEditorBoton').style.display = 'flex';
         }
 
@@ -1725,6 +1652,13 @@
             const tipo = document.getElementById('editorBotonTipo').value;
             document.getElementById('editorBotonModalSelect').style.display = tipo === 'modal' ? 'block' : 'none';
             document.getElementById('editorBotonLinkDiv').style.display = tipo === 'link' ? 'block' : 'none';
+            document.getElementById('editorBotonCustomModalDiv').style.display = tipo === 'customModal' ? 'block' : 'none';
+            if (tipo === 'customModal') cargarOpcionesCustomModalsBotonEditor();
+        }
+
+        function cargarOpcionesCustomModalsBotonEditor(preseleccionado) {
+            const select = document.getElementById('editorBotonCustomModalId');
+            select.innerHTML = dashboardConfig.customModals.map(m => `<option value="${m.id}" ${preseleccionado == m.id ? 'selected' : ''}>${m.titulo}</option>`).join('');
         }
 
         function guardarEdicionBoton() {
@@ -1736,23 +1670,17 @@
             const modalId = document.getElementById('editorBotonModalId').value;
             const link = document.getElementById('editorBotonLink').value.trim();
             const alerta = document.getElementById('editorBotonAlerta').checked;
-
+            let customModalId = null;
+            if (tipo === 'customModal') {
+                customModalId = parseInt(document.getElementById('editorBotonCustomModalId').value);
+                if (!customModalId) { alert('Debes seleccionar un modal personalizado.'); return; }
+            }
             if (!titulo || !icono) { alert('Título e Icono son obligatorios.'); return; }
             if (tipo === 'link' && !link) { alert('Debes ingresar un enlace para botones de tipo "link".'); return; }
-
             const existente = dashboardConfig.botones.find(b => b.id === id);
-            if (existente) {
-                existente.titulo = titulo;
-                existente.descripcion = descripcion;
-                existente.icono = icono;
-                existente.tipo = tipo;
-                existente.modalId = tipo === 'modal' ? modalId : '';
-                existente.link = tipo === 'link' ? link : '';
-                existente.alerta = alerta;
-            } else {
-                dashboardConfig.botones.push({ id, icono, titulo, descripcion, tipo, modalId: tipo === 'modal' ?
-                        modalId : '', link: tipo === 'link' ? link : '', alerta });
-            }
+            const nuevoBoton = { id, icono, titulo, descripcion, tipo, modalId: tipo === 'modal' ? modalId : '', link: tipo === 'link' ? link : '', customModalId: tipo === 'customModal' ? customModalId : null, alerta };
+            if (existente) Object.assign(existente, nuevoBoton);
+            else dashboardConfig.botones.push(nuevoBoton);
             guardarConfiguracion(dashboardConfig);
             cerrarEditorBoton();
             refrescarListaBotonesAdmin();
@@ -1760,12 +1688,10 @@
             mostrarToast('Botón guardado ✅');
         }
 
-        function cerrarEditorBoton() {
-            document.getElementById('modalEditorBoton').style.display = 'none';
-        }
+        function cerrarEditorBoton() { document.getElementById('modalEditorBoton').style.display = 'none'; }
 
         function resetearBotones() {
-            if (!confirm('¿Restaurar todos los botones del menú a sus valores predeterminados? Se perderán los cambios.')) return;
+            if (!confirm('¿Restaurar todos los botones del menú a sus valores predeterminados?')) return;
             dashboardConfig.botones = getDefaultConfig().botones;
             guardarConfiguracion(dashboardConfig);
             refrescarListaBotonesAdmin();
@@ -1779,10 +1705,7 @@
             lista.innerHTML = dashboardConfig.anuncios.map((an, index) => `
                 <div class="btn-list-item">
                     <div style="width:6px; height:40px; background:${an.color}; border-radius:3px; flex-shrink:0;"></div>
-                    <div class="btn-info">
-                        <strong>${an.titulo}</strong>
-                        <small>${an.contenido.substring(0, 60)}...</small>
-                    </div>
+                    <div class="btn-info"><strong>${an.titulo}</strong><small>${an.contenido.substring(0, 60)}...</small></div>
                     <div class="btn-actions">
                         <button class="btn-sm btn-outline" onclick="editarAnuncio(${an.id})"><i class="fas fa-edit"></i></button>
                         <button class="btn-sm btn-outline" onclick="moverAnuncio(${index}, -1)" ${index === 0 ? 'disabled' : ''}><i class="fas fa-arrow-up"></i></button>
@@ -1830,16 +1753,9 @@
             const etiqueta = document.getElementById('editorAnuncioEtiqueta').value.trim();
             if (!titulo || !contenido) { alert('Título y Contenido son obligatorios.'); return; }
             const existente = dashboardConfig.anuncios.find(a => a.id === id);
-            if (existente) {
-                existente.titulo = titulo;
-                existente.contenido = contenido;
-                existente.color = color;
-                existente.link = link;
-                existente.btnTexto = btnTexto;
-                existente.etiqueta = etiqueta;
-            } else {
-                dashboardConfig.anuncios.push({ id, titulo, contenido, color, link, btnTexto, etiqueta });
-            }
+            const nuevoAnuncio = { id, titulo, contenido, color, link, btnTexto, etiqueta };
+            if (existente) Object.assign(existente, nuevoAnuncio);
+            else dashboardConfig.anuncios.push(nuevoAnuncio);
             guardarConfiguracion(dashboardConfig);
             cerrarEditorAnuncio();
             refrescarListaAnunciosAdmin();
@@ -1852,9 +1768,7 @@
         function moverAnuncio(index, direccion) {
             const newIndex = index + direccion;
             if (newIndex < 0 || newIndex >= dashboardConfig.anuncios.length) return;
-            const temp = dashboardConfig.anuncios[index];
-            dashboardConfig.anuncios[index] = dashboardConfig.anuncios[newIndex];
-            dashboardConfig.anuncios[newIndex] = temp;
+            [dashboardConfig.anuncios[index], dashboardConfig.anuncios[newIndex]] = [dashboardConfig.anuncios[newIndex], dashboardConfig.anuncios[index]];
             guardarConfiguracion(dashboardConfig);
             refrescarListaAnunciosAdmin();
             renderizarAnuncios();
@@ -1944,8 +1858,7 @@
             if (!elem) return;
             document.getElementById('editorLabRecursoId').value = elem.id;
             document.getElementById('editorLabRecursoTipo').value = tipo;
-            document.getElementById('editorLabRecursoTitulo').textContent = 'Editar ' + (tipo === 'lab' ?
-                'Laboratorio' : 'Recurso Externo');
+            document.getElementById('editorLabRecursoTitulo').textContent = 'Editar ' + (tipo === 'lab' ? 'Laboratorio' : 'Recurso Externo');
             document.getElementById('editorLabRecursoTituloInput').value = elem.titulo;
             document.getElementById('editorLabRecursoDesc').value = elem.descripcion || '';
             document.getElementById('editorLabRecursoIcono').value = elem.icono;
@@ -1965,15 +1878,9 @@
             if (!titulo || !icono || !link) { alert('Título, Icono y Enlace son obligatorios.'); return; }
             const arr = tipo === 'lab' ? dashboardConfig.labs : dashboardConfig.recursosExternos;
             const existente = arr.find(e => e.id === id);
-            if (existente) {
-                existente.titulo = titulo;
-                existente.descripcion = descripcion;
-                existente.icono = icono;
-                existente.link = link;
-                existente.colorIcono = colorIcono;
-            } else {
-                arr.push({ id, titulo, descripcion, icono, link, colorIcono });
-            }
+            const nuevoElem = { id, titulo, descripcion, icono, link, colorIcono };
+            if (existente) Object.assign(existente, nuevoElem);
+            else arr.push(nuevoElem);
             guardarConfiguracion(dashboardConfig);
             cerrarEditorLabRecurso();
             refrescarListaLabsAdmin();
@@ -1983,16 +1890,13 @@
             mostrarToast('Elemento guardado ✅');
         }
 
-        function cerrarEditorLabRecurso() { document.getElementById('modalEditorLabRecurso').style.display =
-            'none'; }
+        function cerrarEditorLabRecurso() { document.getElementById('modalEditorLabRecurso').style.display = 'none'; }
 
         function moverLabRecurso(tipo, index, direccion) {
             const arr = tipo === 'lab' ? dashboardConfig.labs : dashboardConfig.recursosExternos;
             const newIndex = index + direccion;
             if (newIndex < 0 || newIndex >= arr.length) return;
-            const temp = arr[index];
-            arr[index] = arr[newIndex];
-            arr[newIndex] = temp;
+            [arr[index], arr[newIndex]] = [arr[newIndex], arr[index]];
             guardarConfiguracion(dashboardConfig);
             refrescarListaLabsAdmin();
             refrescarListaRecursosExternosAdmin();
@@ -2034,6 +1938,100 @@
             mostrarToast('Recursos restaurados 🔄');
         }
 
+        // ==================== ADMIN: MODALES PERSONALIZADOS ====================
+        function refrescarListaModalesPersonalizadosAdmin() {
+            const lista = document.getElementById('listaModalesPersonalizadosAdmin');
+            lista.innerHTML = dashboardConfig.customModals.length === 0 ?
+                '<p class="small-note">No hay modales personalizados creados aún.</p>' :
+                dashboardConfig.customModals.map((m, index) => `
+                <div class="btn-list-item">
+                    <div style="width:6px; height:40px; background:${m.color || '#f2b705'}; border-radius:3px; flex-shrink:0;"></div>
+                    <div class="btn-info"><strong>${m.titulo}</strong><small>${m.contenido.replace(/<[^>]*>/g, '').substring(0, 60)}...</small></div>
+                    <div class="btn-actions">
+                        <button class="btn-sm btn-outline" onclick="editarModalPersonalizado(${m.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-sm btn-danger" onclick="eliminarModalPersonalizado(${m.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function agregarNuevoModalPersonalizado() {
+            const nuevoId = Math.max(0, ...dashboardConfig.customModals.map(m => m.id), 0) + 1;
+            document.getElementById('editorModalPersonalizadoId').value = nuevoId;
+            document.getElementById('editorModalPersonalizadoTitulo').textContent = 'Crear Nuevo Modal Personalizado';
+            document.getElementById('editorModalPersonalizadoTituloInput').value = '';
+            document.getElementById('editorModalPersonalizadoContenido').value = '';
+            document.getElementById('editorModalPersonalizadoColor').value = '#f2b705';
+            document.getElementById('modalEditorModalPersonalizado').style.display = 'flex';
+        }
+
+        function editarModalPersonalizado(id) {
+            const modal = dashboardConfig.customModals.find(m => m.id === id);
+            if (!modal) return;
+            document.getElementById('editorModalPersonalizadoId').value = modal.id;
+            document.getElementById('editorModalPersonalizadoTitulo').textContent = 'Editar Modal Personalizado';
+            document.getElementById('editorModalPersonalizadoTituloInput').value = modal.titulo;
+            document.getElementById('editorModalPersonalizadoContenido').value = modal.contenido;
+            document.getElementById('editorModalPersonalizadoColor').value = modal.color || '#f2b705';
+            document.getElementById('modalEditorModalPersonalizado').style.display = 'flex';
+        }
+
+        function guardarEdicionModalPersonalizado() {
+            const id = parseInt(document.getElementById('editorModalPersonalizadoId').value);
+            const titulo = document.getElementById('editorModalPersonalizadoTituloInput').value.trim();
+            const contenido = document.getElementById('editorModalPersonalizadoContenido').value.trim();
+            const color = document.getElementById('editorModalPersonalizadoColor').value;
+            if (!titulo || !contenido) { alert('Título y Contenido son obligatorios.'); return; }
+            const existente = dashboardConfig.customModals.find(m => m.id === id);
+            const nuevoModal = { id, titulo, contenido, color };
+            if (existente) Object.assign(existente, nuevoModal);
+            else dashboardConfig.customModals.push(nuevoModal);
+            guardarConfiguracion(dashboardConfig);
+            cerrarEditorModalPersonalizado();
+            refrescarListaModalesPersonalizadosAdmin();
+            renderizarCustomModals();
+            mostrarToast('Modal personalizado guardado ✅');
+        }
+
+        function cerrarEditorModalPersonalizado() { document.getElementById('modalEditorModalPersonalizado').style.display = 'none'; }
+
+        function eliminarModalPersonalizado(id) {
+            if (!confirm('¿Eliminar este modal personalizado? Los botones que lo usan dejarán de funcionar.')) return;
+            dashboardConfig.customModals = dashboardConfig.customModals.filter(m => m.id !== id);
+            // Limpiar referencias en botones
+            dashboardConfig.botones.forEach(b => {
+                if (b.tipo === 'customModal' && b.customModalId === id) {
+                    b.tipo = 'modal';
+                    b.customModalId = null;
+                    b.modalId = 'modalLabs';
+                }
+            });
+            guardarConfiguracion(dashboardConfig);
+            refrescarListaModalesPersonalizadosAdmin();
+            refrescarListaBotonesAdmin();
+            renderizarCustomModals();
+            renderizarMenu();
+            mostrarToast('Modal personalizado eliminado 🗑️');
+        }
+
+        function resetearModalesPersonalizados() {
+            if (!confirm('¿Eliminar TODOS los modales personalizados?')) return;
+            dashboardConfig.customModals = [];
+            dashboardConfig.botones.forEach(b => {
+                if (b.tipo === 'customModal') {
+                    b.tipo = 'modal';
+                    b.customModalId = null;
+                    b.modalId = 'modalLabs';
+                }
+            });
+            guardarConfiguracion(dashboardConfig);
+            refrescarListaModalesPersonalizadosAdmin();
+            refrescarListaBotonesAdmin();
+            renderizarCustomModals();
+            renderizarMenu();
+            mostrarToast('Modales personalizados eliminados 🔄');
+        }
+
         // ==================== ADMIN: APARIENCIA ====================
         function cargarCamposApariencia() {
             document.getElementById('cfgHeaderTitulo').value = dashboardConfig.header.titulo;
@@ -2044,10 +2042,8 @@
         }
 
         function guardarApariencia() {
-            dashboardConfig.header.titulo = document.getElementById('cfgHeaderTitulo').value.trim() ||
-                'ENTORNO VIRTUAL SJ';
-            dashboardConfig.header.subtitulo = document.getElementById('cfgHeaderSubtitulo').value.trim() ||
-                'I.E.T. San José - Fresno Tolima';
+            dashboardConfig.header.titulo = document.getElementById('cfgHeaderTitulo').value.trim() || 'ENTORNO VIRTUAL SJ';
+            dashboardConfig.header.subtitulo = document.getElementById('cfgHeaderSubtitulo').value.trim() || 'I.E.T. San José - Fresno Tolima';
             dashboardConfig.apariencia.verde = document.getElementById('cfgColorVerde').value;
             dashboardConfig.apariencia.amarillo = document.getElementById('cfgColorAmarillo').value;
             dashboardConfig.apariencia.verdeClaro = document.getElementById('cfgColorVerdeClaro').value;
@@ -2074,6 +2070,7 @@
             renderizarAnuncios();
             renderizarLabs();
             renderizarRecursosExternos();
+            renderizarCustomModals();
             mostrarToast('✅ Todo guardado. Refrescando...');
             setTimeout(() => location.reload(), 800);
         }
@@ -2108,10 +2105,12 @@
                         renderizarAnuncios();
                         renderizarLabs();
                         renderizarRecursosExternos();
+                        renderizarCustomModals();
                         refrescarListaBotonesAdmin();
                         refrescarListaAnunciosAdmin();
                         refrescarListaLabsAdmin();
                         refrescarListaRecursosExternosAdmin();
+                        refrescarListaModalesPersonalizadosAdmin();
                         cargarCamposApariencia();
                         mostrarToast('📥 Configuración importada correctamente');
                     } catch (err) {
@@ -2133,14 +2132,12 @@
             setTimeout(() => toast.remove(), 2500);
         }
 
-        // ==================== UI HELPERS (mantener compatibilidad) ====================
-        function abrirLabs() { document.getElementById("modalLabs").style.display = "flex";
-            renderizarLabs(); }
+        // ==================== UI HELPERS ====================
+        function abrirLabs() { document.getElementById("modalLabs").style.display = "flex"; renderizarLabs(); }
 
         function cerrarLabs() { document.getElementById("modalLabs").style.display = "none"; }
 
-        function abrirRecursosExternos() { document.getElementById("modalRecursosExternos").style.display = "flex";
-            renderizarRecursosExternos(); }
+        function abrirRecursosExternos() { document.getElementById("modalRecursosExternos").style.display = "flex"; renderizarRecursosExternos(); }
 
         function cerrarRecursosExternos() { document.getElementById("modalRecursosExternos").style.display = "none"; }
 
@@ -2169,8 +2166,6 @@
             renderizarAnuncios();
             const cardAnuncios = document.querySelector('[data-id="4"]');
             if (cardAnuncios) cardAnuncios.classList.remove("has-alert");
-            const cardAnunciosOld = document.getElementById("cardAnuncios");
-            if (cardAnunciosOld) cardAnunciosOld.classList.remove("has-alert");
         }
 
         function cerrarAnuncios() { document.getElementById("modalAnuncios").style.display = "none"; }
@@ -2185,8 +2180,7 @@
             const inputApellidos = normalizarTexto(inputRaw);
             const resultadosDiv = document.getElementById("resultadosCredenciales");
             if (!inputApellidos) {
-                resultadosDiv.innerHTML =
-                    "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa tu apellido.</p>";
+                resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa tu apellido.</p>";
                 return;
             }
             const filtrados = window.estudiantesData.filter(est => {
@@ -2195,19 +2189,16 @@
                 return apellidoDB.includes(inputApellidos);
             });
             if (filtrados.length === 0) {
-                resultadosDiv.innerHTML =
-                    "<p class='small-note' style='text-align: center; color: #ff4757;'>❌ No se encontraron estudiantes con esos apellidos en nuestra base de datos.</p>";
+                resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ff4757;'>❌ No se encontraron estudiantes con esos apellidos en nuestra base de datos.</p>";
                 return;
             }
-            let html =
-                '<div class="stats-grid" style="gap:10px; margin-top:15px; grid-template-columns: 1fr;">';
+            let html = '<div class="stats-grid" style="gap:10px; margin-top:15px; grid-template-columns: 1fr;">';
             filtrados.forEach(est => {
-                html += `
-                    <div class="stat-box" style="text-align:left; background:rgba(0,0,0,0.3); padding: 15px; border-left: 4px solid #1e90ff;">
-                        <h4 style="color:#1e90ff; margin-bottom:5px; font-size:1.1rem;">${est["First Name"] || ''} ${est["Last Name"] || ''}</h4>
-                        <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Clase:</strong> ${est["Classes"] || 'No asignada'}</p>
-                        <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Tu Código ZipGrade ID es:</strong> <span style="background:rgba(255,255,255,0.1); padding:3px 8px; border-radius:5px; font-family: monospace; font-size: 1.1rem; color: #fff;">${est["ZipGrade ID"]}</span></p>
-                    </div>`;
+                html += `<div class="stat-box" style="text-align:left; background:rgba(0,0,0,0.3); padding: 15px; border-left: 4px solid #1e90ff;">
+                    <h4 style="color:#1e90ff; margin-bottom:5px; font-size:1.1rem;">${est["First Name"] || ''} ${est["Last Name"] || ''}</h4>
+                    <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Clase:</strong> ${est["Classes"] || 'No asignada'}</p>
+                    <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Tu Código ZipGrade ID es:</strong> <span style="background:rgba(255,255,255,0.1); padding:3px 8px; border-radius:5px; font-family: monospace; font-size: 1.1rem; color: #fff;">${est["ZipGrade ID"]}</span></p>
+                </div>`;
             });
             html += '</div>';
             document.getElementById("inputBuscarApellidos").value = "";
@@ -2220,31 +2211,26 @@
             const inputApellido = normalizarTexto(inputRawApellido);
             const resultadosDiv = document.getElementById("resultadosCredenciales");
             if (!inputZip || !inputApellido) {
-                resultadosDiv.innerHTML =
-                    "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa tu Código ZipGrade y tu Apellido para ver la contraseña.</p>";
+                resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa tu Código ZipGrade y tu Apellido para ver la contraseña.</p>";
                 return;
             }
             const filtrados = window.estudiantesData.filter(est => {
-                const idCoincide = est["ZipGrade ID"] && est["ZipGrade ID"].toString().trim() ===
-                    inputZip;
+                const idCoincide = est["ZipGrade ID"] && est["ZipGrade ID"].toString().trim() === inputZip;
                 if (!est["Last Name"]) return false;
                 const apellidoDB = normalizarTexto(est["Last Name"].toString());
                 const apellidoCoincide = apellidoDB.includes(inputApellido);
                 return idCoincide && apellidoCoincide;
             });
             if (filtrados.length === 0) {
-                resultadosDiv.innerHTML =
-                    "<p class='small-note' style='text-align: center; color: #ff4757;'>❌ Datos incorrectos. Verifica tu Código ZipGrade y que hayas escrito bien tu apellido.</p>";
+                resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ff4757;'>❌ Datos incorrectos. Verifica tu Código ZipGrade y que hayas escrito bien tu apellido.</p>";
                 return;
             }
-            let html =
-                '<div class="stats-grid" style="gap:10px; margin-top:15px; grid-template-columns: 1fr;">';
+            let html = '<div class="stats-grid" style="gap:10px; margin-top:15px; grid-template-columns: 1fr;">';
             filtrados.forEach(est => {
-                html += `
-                    <div class="stat-box" style="text-align:left; background:rgba(0,0,0,0.3); padding: 15px; border-left: 4px solid var(--amarillo);">
-                        <h4 style="color:var(--amarillo); margin-bottom:5px; font-size:1.1rem;">${est["First Name"] || ''} ${est["Last Name"] || ''}</h4>
-                        <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Contraseña de Acceso:</strong> <span style="background:var(--verde-claro); padding:3px 8px; border-radius:5px; font-family: monospace; font-size: 1.1rem; color: white;">${est["Access Code"]}</span></p>
-                    </div>`;
+                html += `<div class="stat-box" style="text-align:left; background:rgba(0,0,0,0.3); padding: 15px; border-left: 4px solid var(--amarillo);">
+                    <h4 style="color:var(--amarillo); margin-bottom:5px; font-size:1.1rem;">${est["First Name"] || ''} ${est["Last Name"] || ''}</h4>
+                    <p style="font-size:0.9rem; margin-bottom:4px;"><strong>Contraseña de Acceso:</strong> <span style="background:var(--verde-claro); padding:3px 8px; border-radius:5px; font-family: monospace; font-size: 1.1rem; color: white;">${est["Access Code"]}</span></p>
+                </div>`;
             });
             html += '</div>';
             document.getElementById("inputZipGrade").value = "";
