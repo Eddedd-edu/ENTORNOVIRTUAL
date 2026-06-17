@@ -718,9 +718,10 @@
                 }
             } catch (error) {
                 console.error("❌ Error al cargar los datos desde GitHub:", error);
+                throw error; // Relanzamos para que el llamador lo capture
             }
         }
-        cargarEstudiantesDesdeGitHub();
+        // La carga ahora se hace bajo demanda, NO se ejecuta al cargar la página.
     </script>
 </head>
 <body>
@@ -2134,23 +2135,14 @@
 
         // ==================== UI HELPERS ====================
         function abrirLabs() { document.getElementById("modalLabs").style.display = "flex"; renderizarLabs(); }
-
         function cerrarLabs() { document.getElementById("modalLabs").style.display = "none"; }
-
         function abrirRecursosExternos() { document.getElementById("modalRecursosExternos").style.display = "flex"; renderizarRecursosExternos(); }
-
         function cerrarRecursosExternos() { document.getElementById("modalRecursosExternos").style.display = "none"; }
-
         function abrirEncuesta() { document.getElementById("modalEncuesta").style.display = "flex"; }
-
         function cerrarEncuesta() { document.getElementById("modalEncuesta").style.display = "none"; }
-
         function abrirLogin() { document.getElementById("modalLogin").style.display = "flex"; }
-
         function cerrarLogin() { document.getElementById("modalLogin").style.display = "none"; }
-
         function cerrarPanel() { document.getElementById("modalPanel").style.display = "none"; }
-
         function abrirCredenciales() {
             document.getElementById("modalCredenciales").style.display = "flex";
             document.getElementById("inputBuscarApellidos").value = "";
@@ -2158,16 +2150,13 @@
             document.getElementById("inputApellido").value = "";
             document.getElementById("resultadosCredenciales").innerHTML = '';
         }
-
         function cerrarCredenciales() { document.getElementById("modalCredenciales").style.display = "none"; }
-
         function abrirAnuncios() {
             document.getElementById("modalAnuncios").style.display = "flex";
             renderizarAnuncios();
             const cardAnuncios = document.querySelector('[data-id="4"]');
             if (cardAnuncios) cardAnuncios.classList.remove("has-alert");
         }
-
         function cerrarAnuncios() { document.getElementById("modalAnuncios").style.display = "none"; }
 
         function normalizarTexto(texto) {
@@ -2175,23 +2164,55 @@
             return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
         }
 
-        function buscarSoloZipGrade() {
+        // ==================== FUNCIONES DE BÚSQUEDA OPTIMIZADAS ====================
+        async function buscarSoloZipGrade() {
+            const resultadosDiv = document.getElementById("resultadosCredenciales");
+            const botones = document.querySelectorAll('#modalCredenciales button');
+
+            // Carga perezosa de los datos (solo si aún no existen)
+            if (window.estudiantesData.length === 0) {
+                // Feedback visual y bloqueo de botones
+                botones.forEach(b => b.disabled = true);
+                resultadosDiv.innerHTML = `
+                    <div style="text-align:center; padding:20px;">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p style="margin-top:10px;">Conectando con la base de datos de matrículas... Por favor espera.</p>
+                    </div>`;
+
+                try {
+                    await cargarEstudiantesDesdeGitHub();
+                } catch (error) {
+                    resultadosDiv.innerHTML = `
+                        <p class='small-note' style='text-align: center; color: #ff4757;'>
+                            ❌ No se pudo conectar con el servidor de matrículas. Revisa tu conexión a internet e inténtalo de nuevo.
+                        </p>`;
+                    botones.forEach(b => b.disabled = false);
+                    return;
+                }
+                // Carga exitosa, reactivamos botones
+                botones.forEach(b => b.disabled = false);
+            }
+
+            // Lógica original de búsqueda
             const inputRaw = document.getElementById("inputBuscarApellidos").value;
             const inputApellidos = normalizarTexto(inputRaw);
-            const resultadosDiv = document.getElementById("resultadosCredenciales");
+
             if (!inputApellidos) {
                 resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa tu apellido.</p>";
                 return;
             }
+
             const filtrados = window.estudiantesData.filter(est => {
                 if (!est["Last Name"]) return false;
                 const apellidoDB = normalizarTexto(est["Last Name"].toString());
                 return apellidoDB.includes(inputApellidos);
             });
+
             if (filtrados.length === 0) {
                 resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ff4757;'>❌ No se encontraron estudiantes con esos apellidos en nuestra base de datos.</p>";
                 return;
             }
+
             let html = '<div class="stats-grid" style="gap:10px; margin-top:15px; grid-template-columns: 1fr;">';
             filtrados.forEach(est => {
                 html += `<div class="stat-box" style="text-align:left; background:rgba(0,0,0,0.3); padding: 15px; border-left: 4px solid #1e90ff;">
@@ -2205,15 +2226,42 @@
             resultadosDiv.innerHTML = html;
         }
 
-        function buscarContrasena() {
+        async function buscarContrasena() {
+            const resultadosDiv = document.getElementById("resultadosCredenciales");
+            const botones = document.querySelectorAll('#modalCredenciales button');
+
+            // Carga perezosa de los datos (solo si aún no existen)
+            if (window.estudiantesData.length === 0) {
+                botones.forEach(b => b.disabled = true);
+                resultadosDiv.innerHTML = `
+                    <div style="text-align:center; padding:20px;">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p style="margin-top:10px;">Conectando con la base de datos de matrículas... Por favor espera.</p>
+                    </div>`;
+
+                try {
+                    await cargarEstudiantesDesdeGitHub();
+                } catch (error) {
+                    resultadosDiv.innerHTML = `
+                        <p class='small-note' style='text-align: center; color: #ff4757;'>
+                            ❌ No se pudo conectar con el servidor de matrículas. Revisa tu conexión a internet e inténtalo de nuevo.
+                        </p>`;
+                    botones.forEach(b => b.disabled = false);
+                    return;
+                }
+                botones.forEach(b => b.disabled = false);
+            }
+
+            // Lógica original de búsqueda
             const inputZip = document.getElementById("inputZipGrade").value.trim();
             const inputRawApellido = document.getElementById("inputApellido").value;
             const inputApellido = normalizarTexto(inputRawApellido);
-            const resultadosDiv = document.getElementById("resultadosCredenciales");
+
             if (!inputZip || !inputApellido) {
                 resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ffc926;'>⚠️ Por favor, ingresa tu Código ZipGrade y tu Apellido para ver la contraseña.</p>";
                 return;
             }
+
             const filtrados = window.estudiantesData.filter(est => {
                 const idCoincide = est["ZipGrade ID"] && est["ZipGrade ID"].toString().trim() === inputZip;
                 if (!est["Last Name"]) return false;
@@ -2221,10 +2269,12 @@
                 const apellidoCoincide = apellidoDB.includes(inputApellido);
                 return idCoincide && apellidoCoincide;
             });
+
             if (filtrados.length === 0) {
                 resultadosDiv.innerHTML = "<p class='small-note' style='text-align: center; color: #ff4757;'>❌ Datos incorrectos. Verifica tu Código ZipGrade y que hayas escrito bien tu apellido.</p>";
                 return;
             }
+
             let html = '<div class="stats-grid" style="gap:10px; margin-top:15px; grid-template-columns: 1fr;">';
             filtrados.forEach(est => {
                 html += `<div class="stat-box" style="text-align:left; background:rgba(0,0,0,0.3); padding: 15px; border-left: 4px solid var(--amarillo);">
